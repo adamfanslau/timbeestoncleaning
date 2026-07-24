@@ -4,23 +4,25 @@
    ========================================================================== */
 
 :root {
-  /* Color — light (default) */
-  --color-bg: #F7F8F6;
-  --color-bg-alt: #EFF2F1;
-  --color-surface: #FFFFFF;
-  --color-text: #14181A;
-  --color-text-muted: #4B5559;
-  --color-border: #E1E6E5;
-  --color-accent: #1E7A8C;
-  --color-accent-strong: #145A68;
-  --color-accent-tint: #E4F1F3;
-  --color-header-bg: rgba(247, 248, 246, 0.72);
-  --color-overlay: rgba(17, 19, 21, 0.55);
+  /* Color — dark (site default; the topbar switch sets data-theme).
+     color-scheme keeps native form controls/scrollbars in step. */
+  color-scheme: dark;
+  --color-bg: #0E1113;
+  --color-bg-alt: #15191B;
+  --color-surface: #181D20;
+  --color-text: #F2F4F3;
+  --color-text-muted: #A7B0B2;
+  --color-border: #262C2F;
+  --color-accent: #4FB6C9;
+  --color-accent-strong: #7ED0DE;
+  --color-accent-tint: #12262A;
+  --color-header-bg: rgba(14, 17, 19, 0.72);
+  --color-overlay: rgba(0, 0, 0, 0.6);
 
-  --color-footer-bg: #14181A;
-  --color-footer-text: #F7F8F6;
-  --color-footer-muted: rgba(247, 248, 246, 0.72);
-  --color-footer-rule: rgba(255, 255, 255, 0.12);
+  --color-footer-bg: #15191B;
+  --color-footer-text: #F2F4F3;
+  --color-footer-muted: rgba(242, 244, 243, 0.68);
+  --color-footer-rule: rgba(255, 255, 255, 0.10);
 
   /* Type */
   --font-body: "Open Sans", system-ui, -apple-system, sans-serif;
@@ -59,9 +61,9 @@
   --radius-lg: 28px;
   --radius-pill: 999px;
 
-  --shadow-sm: 0 2px 10px rgba(17, 19, 21, 0.06);
-  --shadow-md: 0 12px 32px rgba(17, 19, 21, 0.10);
-  --shadow-lg: 0 24px 60px rgba(17, 19, 21, 0.16);
+  --shadow-sm: 0 2px 10px rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 12px 32px rgba(0, 0, 0, 0.35);
+  --shadow-lg: 0 24px 60px rgba(0, 0, 0, 0.5);
 
   /* Motion */
   --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
@@ -80,6 +82,38 @@
   /* Decorative glass/water artwork. Alphas stay low enough that no shape
      can affect text contrast; dark mode needs higher values because
      low-alpha light tones read as grey haze on near-black. */
+  --deco-tint: #4FB6C9;
+  --deco-glass: #9FD9E4;
+  --deco-o-front: 0.14;
+  --deco-o-mid: 0.10;
+  --deco-o-back: 0.07;
+  --deco-stroke-o: 0.22;
+
+  --header-h: 76px;
+  /* Fixed so the hero can subtract exactly the chrome above it */
+  --topbar-h: 42px;
+}
+
+/* Light theme — opted into via the topbar switch (persisted in localStorage) */
+:root[data-theme="light"] {
+  color-scheme: light;
+  --color-bg: #F7F8F6;
+  --color-bg-alt: #EFF2F1;
+  --color-surface: #FFFFFF;
+  --color-text: #14181A;
+  --color-text-muted: #4B5559;
+  --color-border: #E1E6E5;
+  --color-accent: #1E7A8C;
+  --color-accent-strong: #145A68;
+  --color-accent-tint: #E4F1F3;
+  --color-header-bg: rgba(247, 248, 246, 0.72);
+  --color-overlay: rgba(17, 19, 21, 0.55);
+
+  --color-footer-bg: #14181A;
+  --color-footer-text: #F7F8F6;
+  --color-footer-muted: rgba(247, 248, 246, 0.72);
+  --color-footer-rule: rgba(255, 255, 255, 0.12);
+
   --deco-tint: #1E7A8C;
   --deco-glass: #FFFFFF;
   --deco-o-front: 0.10;
@@ -87,39 +121,7 @@
   --deco-o-back: 0.05;
   --deco-stroke-o: 0.18;
 
-  --header-h: 76px;
-  /* Fixed so the hero can subtract exactly the chrome above it */
-  --topbar-h: 42px;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --color-bg: #0E1113;
-    --color-bg-alt: #15191B;
-    --color-surface: #181D20;
-    --color-text: #F2F4F3;
-    --color-text-muted: #A7B0B2;
-    --color-border: #262C2F;
-    --color-accent: #4FB6C9;
-    --color-accent-strong: #7ED0DE;
-    --color-accent-tint: #12262A;
-    --color-header-bg: rgba(14, 17, 19, 0.72);
-    --color-overlay: rgba(0, 0, 0, 0.6);
-
-    --color-footer-bg: #15191B;
-    --color-footer-text: #F2F4F3;
-    --color-footer-muted: rgba(242, 244, 243, 0.68);
-    --color-footer-rule: rgba(255, 255, 255, 0.10);
-
-    --deco-tint: #4FB6C9;
-    --deco-glass: #9FD9E4;
-    --deco-o-front: 0.14;
-    --deco-o-mid: 0.10;
-    --deco-o-back: 0.07;
-    --deco-stroke-o: 0.22;
-
-    --shadow-sm: 0 2px 10px rgba(0, 0, 0, 0.3);
-    --shadow-md: 0 12px 32px rgba(0, 0, 0, 0.35);
-    --shadow-lg: 0 24px 60px rgba(0, 0, 0, 0.5);
-  }
+  --shadow-sm: 0 2px 10px rgba(17, 19, 21, 0.06);
+  --shadow-md: 0 12px 32px rgba(17, 19, 21, 0.10);
+  --shadow-lg: 0 24px 60px rgba(17, 19, 21, 0.16);
 }

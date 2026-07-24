@@ -36,6 +36,67 @@
 #topbar .contact-info a:hover { color: var(--color-accent); }
 #topbar .contact-info svg { width: 15px; height: 15px; color: var(--color-accent); }
 
+#topbar .topbar-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+/* Theme switch — a pill that slides a knob between sun and moon.
+   It is a real <button> with aria-pressed, so it is keyboard and SR usable. */
+.theme-toggle {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  width: 58px;
+  height: 28px;
+  padding: 0 6px;
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: border-color var(--dur-fast) var(--ease-out),
+              background var(--dur-fast) var(--ease-out);
+}
+.theme-toggle:hover { border-color: var(--color-accent); }
+
+.theme-toggle svg {
+  width: 14px;
+  height: 14px;
+  position: relative;
+  z-index: 1;
+  transition: color var(--dur-base) var(--ease-out),
+              opacity var(--dur-base) var(--ease-out);
+}
+.theme-toggle .icon-sun { color: var(--color-text-muted); opacity: 0.55; }
+.theme-toggle .icon-moon { color: var(--color-accent); opacity: 1; }
+
+:root[data-theme="light"] .theme-toggle .icon-sun { color: var(--color-accent); opacity: 1; }
+:root[data-theme="light"] .theme-toggle .icon-moon { color: var(--color-text-muted); opacity: 0.55; }
+
+/* The sliding knob sits behind the icons */
+.theme-toggle::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 3px;
+  width: 22px;
+  height: 22px;
+  margin-top: -11px;
+  border-radius: 50%;
+  background: var(--color-accent-tint);
+  border: 1px solid var(--color-accent);
+  transform: translateX(26px);
+  transition: transform var(--dur-base) var(--ease-back);
+}
+:root[data-theme="light"] .theme-toggle::after { transform: translateX(0); }
+
+@media (prefers-reduced-motion: reduce) {
+  .theme-toggle::after { transition: none; }
+}
+
 #topbar .social-links {
   display: flex;
   gap: var(--space-xs);
@@ -80,16 +141,16 @@
   gap: var(--space-md);
 }
 
+/* The wordmark is solid black artwork, so it is inverted for the default dark
+   theme and returned to its natural black in light mode. */
 #header .logo img {
   height: 40px;
   width: auto;
   display: block;
+  filter: invert(1);
 }
 
-/* The wordmark is solid black artwork — flip it so it reads on a dark background */
-@media (prefers-color-scheme: dark) {
-  #header .logo img { filter: invert(1); }
-}
+:root[data-theme="light"] #header .logo img { filter: none; }
 
 .nav-menu ul {
   display: flex;

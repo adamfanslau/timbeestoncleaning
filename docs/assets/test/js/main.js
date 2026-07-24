@@ -271,45 +271,36 @@
     });
   }
 
-  /* ---------- Contact form (Web3Forms) ---------- */
-  function initContactForm() {
-    var form = document.getElementById("contact-form");
-    if (!form) return;
-    var status = document.getElementById("form-status");
-    var submitBtn = form.querySelector("button[type='submit']");
+  /* ---------- Theme switch ----------
+   * Dark is the default (no attribute); light is opt-in via data-theme.
+   * The initial attribute is set by the inline head script to avoid a flash,
+   * so this only has to keep the button state and storage in sync.
+   */
+  function initThemeToggle() {
+    var btn = document.getElementById("theme-toggle");
+    if (!btn) return;
+    var root = document.documentElement;
 
-    form.addEventListener("submit", function (e) {
-      e.preventDefault();
+    function sync() {
+      var isDark = root.getAttribute("data-theme") !== "light";
+      btn.setAttribute("aria-pressed", String(isDark));
+      btn.setAttribute("aria-label", isDark ? "Switch to light theme" : "Switch to dark theme");
+    }
 
-      if (form.querySelector("[name='botcheck']").value) return; // honeypot tripped
-
-      submitBtn.disabled = true;
-      status.className = "form-status";
-      status.textContent = "Sending…";
-
-      fetch("https://api.web3forms.com/submit", {
-        method: "POST",
-        headers: { "Content-Type": "application/json", Accept: "application/json" },
-        body: JSON.stringify(Object.fromEntries(new FormData(form))),
-      })
-        .then(function (res) { return res.json(); })
-        .then(function (data) {
-          if (data.success) {
-            status.className = "form-status is-success";
-            status.textContent = "Thanks — your message has been sent. We'll be in touch soon!";
-            form.reset();
-          } else {
-            throw new Error(data.message || "Something went wrong");
-          }
-        })
-        .catch(function () {
-          status.className = "form-status is-error";
-          status.textContent = "Sorry, something went wrong sending your message — please try emailing or calling us directly.";
-        })
-        .finally(function () {
-          submitBtn.disabled = false;
-        });
+    btn.addEventListener("click", function () {
+      var toLight = root.getAttribute("data-theme") !== "light";
+      if (toLight) {
+        root.setAttribute("data-theme", "light");
+      } else {
+        root.removeAttribute("data-theme");
+      }
+      try {
+        localStorage.setItem("theme", toLight ? "light" : "dark");
+      } catch (e) { /* storage unavailable — theme still applies for this visit */ }
+      sync();
     });
+
+    sync();
   }
 
   /* ---------- Back to top ---------- */
@@ -451,13 +442,13 @@
   }
 
   document.addEventListener("DOMContentLoaded", function () {
+    initThemeToggle();
     initNav();
     initStickyHeader();
     initHeroCarousel();
     var reveal = initScrollReveal();
     initPortfolioFilter(reveal);
     initLightbox();
-    initContactForm();
     initBackToTop();
     initDecoParallax();
   });
