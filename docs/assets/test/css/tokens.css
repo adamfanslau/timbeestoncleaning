@@ -1,0 +1,125 @@
+/* ==========================================================================
+   Design tokens — "Clearwater Minimal"
+   Single source of truth for color, type, spacing, radii, motion timing.
+   ========================================================================== */
+
+:root {
+  /* Color — light (default) */
+  --color-bg: #F7F8F6;
+  --color-bg-alt: #EFF2F1;
+  --color-surface: #FFFFFF;
+  --color-text: #14181A;
+  --color-text-muted: #4B5559;
+  --color-border: #E1E6E5;
+  --color-accent: #1E7A8C;
+  --color-accent-strong: #145A68;
+  --color-accent-tint: #E4F1F3;
+  --color-header-bg: rgba(247, 248, 246, 0.72);
+  --color-overlay: rgba(17, 19, 21, 0.55);
+
+  --color-footer-bg: #14181A;
+  --color-footer-text: #F7F8F6;
+  --color-footer-muted: rgba(247, 248, 246, 0.72);
+  --color-footer-rule: rgba(255, 255, 255, 0.12);
+
+  /* Type */
+  --font-body: "Open Sans", system-ui, -apple-system, sans-serif;
+  --font-display: "Raleway", system-ui, -apple-system, sans-serif;
+
+  --fs-sm: clamp(0.83rem, 0.8rem + 0.15vw, 0.95rem);
+  --fs-base: clamp(1rem, 0.96rem + 0.2vw, 1.125rem);
+  --fs-lg: clamp(1.15rem, 1.05rem + 0.4vw, 1.4rem);
+  --fs-xl: clamp(1.4rem, 1.2rem + 0.9vw, 1.9rem);
+  --fs-2xl: clamp(1.65rem, 1.35rem + 1.35vw, 2.25rem);
+  --fs-3xl: clamp(2.1rem, 1.6rem + 2.5vw, 3.25rem);
+
+  --lh-tight: 1.15;
+  --lh-normal: 1.6;
+
+  /* Spacing scale */
+  --space-3xs: 0.25rem;
+  --space-2xs: 0.5rem;
+  --space-xs: 0.75rem;
+  --space-sm: 1rem;
+  --space-md: 1.5rem;
+  --space-lg: 2rem;
+  --space-xl: clamp(2.5rem, 1.9rem + 1.6vw, 3.5rem);
+
+  /* Vertical padding for content sections (its only consumer). Sized so a
+     typical section fits inside (viewport − sticky header) on ~800px-tall
+     laptop windows. */
+  --section-pad: clamp(2.5rem, 1.8rem + 1.5vw, 3.25rem);
+
+  --container-w: 1180px;
+  --container-pad: clamp(1.25rem, 4vw, 2.5rem);
+
+  /* Radii & shadow */
+  --radius-sm: 8px;
+  --radius-md: 16px;
+  --radius-lg: 28px;
+  --radius-pill: 999px;
+
+  --shadow-sm: 0 2px 10px rgba(17, 19, 21, 0.06);
+  --shadow-md: 0 12px 32px rgba(17, 19, 21, 0.10);
+  --shadow-lg: 0 24px 60px rgba(17, 19, 21, 0.16);
+
+  /* Motion */
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --dur-fast: 180ms;
+  --dur-base: 320ms;
+  --dur-slow: 600ms;
+
+  /* Scroll-reveal. --ease-back overshoots slightly, so it is applied to
+     transform only — on opacity it would overshoot past 1 and just clamp. */
+  --ease-back: cubic-bezier(0.22, 1.28, 0.36, 1);
+  --reveal-dur: 700ms;
+  --reveal-fade: 450ms;
+  --reveal-step: 80ms;
+  --reveal-y: 40px;
+
+  /* Decorative glass/water artwork. Alphas stay low enough that no shape
+     can affect text contrast; dark mode needs higher values because
+     low-alpha light tones read as grey haze on near-black. */
+  --deco-tint: #1E7A8C;
+  --deco-glass: #FFFFFF;
+  --deco-o-front: 0.10;
+  --deco-o-mid: 0.07;
+  --deco-o-back: 0.05;
+  --deco-stroke-o: 0.18;
+
+  --header-h: 76px;
+  /* Fixed so the hero can subtract exactly the chrome above it */
+  --topbar-h: 42px;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-bg: #0E1113;
+    --color-bg-alt: #15191B;
+    --color-surface: #181D20;
+    --color-text: #F2F4F3;
+    --color-text-muted: #A7B0B2;
+    --color-border: #262C2F;
+    --color-accent: #4FB6C9;
+    --color-accent-strong: #7ED0DE;
+    --color-accent-tint: #12262A;
+    --color-header-bg: rgba(14, 17, 19, 0.72);
+    --color-overlay: rgba(0, 0, 0, 0.6);
+
+    --color-footer-bg: #15191B;
+    --color-footer-text: #F2F4F3;
+    --color-footer-muted: rgba(242, 244, 243, 0.68);
+    --color-footer-rule: rgba(255, 255, 255, 0.10);
+
+    --deco-tint: #4FB6C9;
+    --deco-glass: #9FD9E4;
+    --deco-o-front: 0.14;
+    --deco-o-mid: 0.10;
+    --deco-o-back: 0.07;
+    --deco-stroke-o: 0.22;
+
+    --shadow-sm: 0 2px 10px rgba(0, 0, 0, 0.3);
+    --shadow-md: 0 12px 32px rgba(0, 0, 0, 0.35);
+    --shadow-lg: 0 24px 60px rgba(0, 0, 0, 0.5);
+  }
+}

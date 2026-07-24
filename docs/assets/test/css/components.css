@@ -1,0 +1,716 @@
+/* ==========================================================================
+   Components — buttons, hero, cards, gallery, lightbox, forms, faq
+   ========================================================================== */
+
+/* ---------- Reveal transition ---------- */
+/* --reveal-i is set per element by initScrollReveal(), indexed within the
+   batch that entered the viewport together, which is what produces the
+   cascade. Opacity finishes early so the fade reads crisp while the
+   transform is still settling out of its overshoot. */
+.js [data-reveal] {
+  --reveal-delay: calc(var(--reveal-i, 0) * var(--reveal-step));
+  transition: opacity var(--reveal-fade) var(--ease-out) var(--reveal-delay),
+              transform var(--reveal-dur) var(--ease-back) var(--reveal-delay);
+}
+
+/* 9 items would otherwise trail 640ms behind the first */
+.portfolio-grid { --reveal-step: 60ms; }
+
+@media (max-width: 600px) {
+  .js [data-reveal] { --reveal-y: 24px; }
+}
+
+/* ---------- Buttons ---------- */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2xs);
+  padding: 0.85em 1.7em;
+  border-radius: var(--radius-pill);
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: var(--fs-sm);
+  letter-spacing: 0.02em;
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: transform var(--dur-fast) var(--ease-out),
+              box-shadow var(--dur-fast) var(--ease-out),
+              background var(--dur-fast) var(--ease-out),
+              color var(--dur-fast) var(--ease-out);
+}
+.btn-primary {
+  background: var(--color-accent);
+  color: #fff;
+  box-shadow: var(--shadow-sm);
+}
+.btn-primary:hover {
+  background: var(--color-accent-strong);
+  color: #fff;
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+.btn-ghost {
+  background: rgba(255, 255, 255, 0.12);
+  color: #fff;
+  border-color: rgba(255, 255, 255, 0.5);
+  backdrop-filter: blur(6px);
+}
+.btn-ghost:hover {
+  background: rgba(255, 255, 255, 0.22);
+  color: #fff;
+  transform: translateY(-2px);
+}
+
+/* ---------- Hero ---------- */
+#hero {
+  position: relative;
+  /* Exact fit: topbar + header + hero = one viewport, so the carousel
+     controls at the hero's bottom edge are never pushed below the fold.
+     svh keeps this stable when the iOS URL bar collapses. */
+  height: min(calc(100vh - var(--topbar-h) - var(--header-h)), 760px);
+  height: min(calc(100svh - var(--topbar-h) - var(--header-h)), 760px);
+  min-height: 480px;
+  overflow: hidden;
+}
+
+.hero-track {
+  display: flex;
+  height: 100%;
+  scroll-snap-type: x mandatory;
+  overflow-x: hidden;
+  overflow-y: hidden;
+}
+
+.hero-slide {
+  position: relative;
+  flex: 0 0 100%;
+  height: 100%;
+  scroll-snap-align: start;
+  display: flex;
+  align-items: center;
+  /* Clips the parallax-scaled image so it can't widen the scroll track */
+  overflow: hidden;
+}
+
+.hero-slide img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  z-index: 0;
+}
+
+.hero-slide::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(14,17,19,0.35) 0%, rgba(14,17,19,0.55) 100%);
+  z-index: 1;
+}
+
+.hero-slide .hero-content {
+  position: relative;
+  z-index: 2;
+  color: #fff;
+  max-width: 640px;
+}
+
+.hero-slide h2 {
+  color: #fff;
+  font-size: var(--fs-3xl);
+  font-weight: 800;
+  margin-bottom: var(--space-sm);
+}
+
+.hero-slide p {
+  font-size: var(--fs-lg);
+  color: rgba(255, 255, 255, 0.88);
+  margin-bottom: var(--space-md);
+}
+
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .hero-slide img {
+      animation: hero-parallax linear;
+      animation-timeline: view();
+    }
+  }
+}
+@keyframes hero-parallax {
+  from { transform: scale(1.08) translateY(-3%); }
+  to   { transform: scale(1.08) translateY(3%); }
+}
+
+.hero-controls {
+  position: absolute;
+  z-index: 3;
+  bottom: var(--space-md);
+  left: 0; right: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-md);
+}
+
+.hero-arrow {
+  width: 42px; height: 42px;
+  border-radius: var(--radius-pill);
+  background: rgba(255, 255, 255, 0.14);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  color: #fff;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  backdrop-filter: blur(6px);
+}
+.hero-arrow svg { width: 18px; height: 18px; }
+
+.hero-dots {
+  display: flex;
+  gap: var(--space-2xs);
+}
+.hero-dot {
+  width: 9px; height: 9px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.45);
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  transition: background var(--dur-fast) var(--ease-out), transform var(--dur-fast) var(--ease-out);
+}
+.hero-dot.is-active {
+  background: #fff;
+  transform: scale(1.3);
+}
+
+@media (min-width: 700px) {
+  .hero-arrow { display: inline-flex; }
+}
+
+/* ---------- About ---------- */
+.about-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-xl);
+  align-items: center;
+}
+@media (max-width: 860px) {
+  .about-grid { grid-template-columns: 1fr; }
+}
+
+.about-media img {
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+  aspect-ratio: 4 / 3.6;
+  object-fit: cover;
+  width: 100%;
+  /* Required: the height="" attribute is a presentational hint, and with both
+     dimensions definite the browser ignores aspect-ratio entirely. */
+  height: auto;
+}
+
+.about-copy .eyebrow {
+  display: inline-block;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: var(--fs-sm);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--color-accent);
+  margin-bottom: var(--space-3xs);
+}
+.about-copy h2 { margin-bottom: var(--space-2xs); }
+
+.about-copy p {
+  color: var(--color-text-muted);
+  margin-bottom: var(--space-xs);
+}
+
+.icon-box-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-sm);
+  margin-top: var(--space-md);
+}
+@media (max-width: 520px) {
+  .icon-box-grid { grid-template-columns: 1fr; }
+}
+
+.icon-box {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: var(--space-sm);
+  transition: transform var(--dur-base) var(--ease-out), box-shadow var(--dur-base) var(--ease-out);
+}
+.icon-box:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-md);
+}
+.icon-box .icon {
+  width: 36px; height: 36px;
+  border-radius: var(--radius-sm);
+  background: var(--color-accent-tint);
+  color: var(--color-accent);
+  display: flex; align-items: center; justify-content: center;
+  margin-bottom: var(--space-2xs);
+}
+.icon-box .icon svg { width: 19px; height: 19px; }
+.icon-box h4 { font-size: var(--fs-base); text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: var(--space-2xs); }
+.icon-box p { color: var(--color-text-muted); font-size: var(--fs-sm); line-height: 1.45; }
+
+/* ---------- Services — bento grid ---------- */
+.services-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--space-md);
+}
+@media (max-width: 980px) {
+  .services-grid { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 560px) {
+  .services-grid { grid-template-columns: 1fr; }
+}
+
+.service-card {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-lg) var(--space-md);
+  transition: transform var(--dur-base) var(--ease-out), box-shadow var(--dur-base) var(--ease-out), border-color var(--dur-base) var(--ease-out);
+}
+.service-card:hover {
+  transform: translateY(-6px);
+  box-shadow: var(--shadow-lg);
+  border-color: var(--color-accent);
+}
+.service-card .icon {
+  width: 52px; height: 52px;
+  border-radius: var(--radius-sm);
+  background: var(--color-accent-tint);
+  color: var(--color-accent);
+  display: flex; align-items: center; justify-content: center;
+  margin-bottom: var(--space-md);
+}
+.service-card .icon svg { width: 26px; height: 26px; }
+.service-card h4 { margin-bottom: var(--space-xs); }
+.service-card p { color: var(--color-text-muted); font-size: var(--fs-sm); }
+
+/* ---------- Photo gallery ---------- */
+.portfolio-filters {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: var(--space-2xs);
+  margin-bottom: var(--space-lg);
+}
+.portfolio-filters button {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  color: var(--color-text-muted);
+  padding: 0.5em 1.2em;
+  border-radius: var(--radius-pill);
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: var(--fs-sm);
+  cursor: pointer;
+  transition: all var(--dur-fast) var(--ease-out);
+}
+.portfolio-filters button:hover {
+  border-color: var(--color-accent);
+  color: var(--color-accent);
+}
+.portfolio-filters button.is-active {
+  background: var(--color-accent);
+  border-color: var(--color-accent);
+  color: #fff;
+}
+
+/* One swipeable snap row instead of a 3x3 grid — a full grid of nine photos
+   cannot fit a laptop viewport, a strip always does. The scroller owns its
+   own x-overflow, so the page never gains a horizontal scrollbar. */
+.portfolio-grid {
+  display: flex;
+  gap: var(--space-sm);
+  overflow-x: auto;
+  scroll-snap-type: x proximity;
+  padding-bottom: var(--space-xs);
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-accent) transparent;
+}
+
+.portfolio-grid > .portfolio-item {
+  flex: 0 0 clamp(240px, 62vw, 340px);
+  scroll-snap-align: start;
+}
+
+.portfolio-item {
+  position: relative;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  aspect-ratio: 4 / 3;
+  cursor: pointer;
+  background: var(--color-bg-alt);
+  border: none;
+  padding: 0;
+  display: block;
+  width: 100%;
+}
+.portfolio-item[hidden] { display: none; }
+
+.portfolio-item img {
+  width: 100%; height: 100%;
+  object-fit: cover;
+  transition: transform var(--dur-slow) var(--ease-out);
+}
+.portfolio-item:hover img { transform: scale(1.06); }
+
+.portfolio-item .portfolio-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(17,19,21,0) 45%, rgba(17,19,21,0.72) 100%);
+  display: flex;
+  align-items: flex-end;
+  padding: var(--space-sm);
+  opacity: 0;
+  transition: opacity var(--dur-fast) var(--ease-out);
+}
+.portfolio-item:hover .portfolio-overlay,
+.portfolio-item:focus-visible .portfolio-overlay { opacity: 1; }
+
+.portfolio-overlay span {
+  color: #fff;
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: var(--fs-sm);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.portfolio-overlay svg { width: 16px; height: 16px; }
+
+/* Lightbox dialog */
+.lightbox {
+  border: none;
+  padding: 0;
+  background: transparent;
+  max-width: min(92vw, 1100px);
+  max-height: 88vh;
+}
+.lightbox::backdrop {
+  background: rgba(10, 12, 13, 0.85);
+  backdrop-filter: blur(4px);
+}
+.lightbox img {
+  display: block;
+  max-width: min(92vw, 1100px);
+  max-height: 80vh;
+  width: auto;
+  height: auto;
+  border-radius: var(--radius-md);
+  margin-inline: auto;
+}
+.lightbox-caption {
+  text-align: center;
+  color: #fff;
+  font-family: var(--font-display);
+  font-size: var(--fs-sm);
+  margin-top: var(--space-sm);
+}
+.lightbox-close {
+  position: fixed;
+  top: var(--space-md);
+  right: var(--space-md);
+  width: 42px; height: 42px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.12);
+  border: 1px solid rgba(255,255,255,0.35);
+  color: #fff;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer;
+}
+.lightbox-close svg { width: 18px; height: 18px; }
+.lightbox-nav {
+  position: fixed;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 46px; height: 46px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.12);
+  border: 1px solid rgba(255,255,255,0.35);
+  color: #fff;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer;
+}
+.lightbox-nav svg { width: 20px; height: 20px; }
+.lightbox-nav.prev { left: var(--space-md); }
+.lightbox-nav.next { right: var(--space-md); }
+@media (max-width: 600px) {
+  .lightbox-nav { display: none; }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  @supports (view-transition-name: none) {
+    .lightbox { view-transition-name: lightbox; }
+  }
+}
+
+/* ---------- Team ---------- */
+.team-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: var(--space-lg);
+  max-width: 560px;
+  margin-inline: auto;
+}
+
+.team-member { text-align: center; }
+.team-member .pic {
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  aspect-ratio: 1;
+  margin-bottom: var(--space-sm);
+  box-shadow: var(--shadow-sm);
+}
+.team-member .pic img {
+  width: 100%; height: 100%;
+  object-fit: cover;
+  transition: transform var(--dur-base) var(--ease-out);
+}
+.team-member:hover .pic img { transform: scale(1.05); }
+.team-member h4 { margin-bottom: 2px; }
+.team-member .role {
+  display: block;
+  color: var(--color-text-muted);
+  font-size: var(--fs-sm);
+  margin-bottom: var(--space-xs);
+}
+.team-member .social {
+  display: flex;
+  justify-content: center;
+  gap: var(--space-2xs);
+}
+.team-member .social a {
+  width: 32px; height: 32px;
+  border-radius: 50%;
+  background: var(--color-accent-tint);
+  color: var(--color-accent);
+  display: flex; align-items: center; justify-content: center;
+}
+.team-member .social a:hover { background: var(--color-accent); color: #fff; }
+.team-member .social svg { width: 14px; height: 14px; }
+
+/* ---------- FAQ ---------- */
+.faq-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-sm);
+}
+@media (max-width: 760px) {
+  .faq-grid { grid-template-columns: 1fr; }
+}
+.faq-item {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: var(--space-sm) var(--space-md);
+}
+.faq-item p { font-size: var(--fs-sm); }
+.faq-item h4 {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-2xs);
+}
+.faq-item h4 svg {
+  width: 16px; height: 16px;
+  color: var(--color-accent);
+  flex-shrink: 0;
+}
+.faq-item p { color: var(--color-text-muted); }
+
+/* ---------- Contact ---------- */
+.contact-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-md);
+  margin-bottom: var(--space-xl);
+}
+@media (max-width: 760px) {
+  .contact-grid { grid-template-columns: 1fr; }
+}
+
+/* Desktop: info boxes stack beside the form instead of above it, roughly
+   halving the section height so it fits one viewport */
+@media (min-width: 900px) {
+  #contact .container {
+    display: grid;
+    grid-template-columns: 300px 1fr;
+    gap: var(--space-sm) var(--space-lg);
+    align-items: start;
+  }
+  #contact .section-title { grid-column: 1 / -1; margin-bottom: 0; }
+  .contact-grid {
+    grid-template-columns: 1fr;
+    gap: var(--space-sm);
+    margin-bottom: 0;
+  }
+  /* Compact row form: icon beside a stacked heading/text block */
+  .info-box {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    text-align: left;
+    padding: var(--space-sm) var(--space-md);
+  }
+  .info-box .icon { margin: 0; flex-shrink: 0; }
+  .info-box h3 { font-size: var(--fs-base); margin-bottom: 2px; }
+  .info-box .info-text { min-width: 0; }
+  .contact-form { margin-inline: 0; max-width: none; padding: var(--space-md); }
+}
+.info-box {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: var(--space-md);
+  text-align: center;
+}
+.info-box .icon {
+  width: 46px; height: 46px;
+  border-radius: 50%;
+  background: var(--color-accent-tint);
+  color: var(--color-accent);
+  display: flex; align-items: center; justify-content: center;
+  margin-inline: auto;
+  margin-bottom: var(--space-sm);
+}
+.info-box .icon svg { width: 22px; height: 22px; }
+.info-box p { color: var(--color-text-muted); }
+
+.contact-form {
+  max-width: 720px;
+  margin-inline: auto;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-lg);
+  box-shadow: var(--shadow-sm);
+}
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-sm);
+}
+@media (max-width: 560px) {
+  .form-row { grid-template-columns: 1fr; }
+}
+.form-group { margin-bottom: var(--space-sm); }
+.contact-form label {
+  display: block;
+  font-size: var(--fs-sm);
+  font-weight: 600;
+  margin-bottom: var(--space-3xs);
+  color: var(--color-text-muted);
+}
+.contact-form input,
+.contact-form textarea {
+  width: 100%;
+  padding: 0.75em 0.9em;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--color-border);
+  background: var(--color-bg);
+  color: var(--color-text);
+  transition: border-color var(--dur-fast) var(--ease-out), box-shadow var(--dur-fast) var(--ease-out);
+}
+.contact-form input:focus,
+.contact-form textarea:focus {
+  outline: none;
+  border-color: var(--color-accent);
+  box-shadow: 0 0 0 3px var(--color-accent-tint);
+}
+.contact-form textarea { resize: vertical; min-height: 96px; }
+.form-honeypot { position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden; }
+
+.form-status {
+  min-height: 1.4em;
+  font-size: var(--fs-sm);
+  margin-bottom: var(--space-sm);
+}
+.form-status.is-success { color: #1c8a4d; }
+.form-status.is-error { color: #c9432f; }
+
+.contact-form .btn { width: 100%; justify-content: center; }
+.contact-form .btn[disabled] { opacity: 0.7; cursor: progress; }
+
+/* ---------- Social embed ---------- */
+.social-embed h4 { color: var(--color-bg); }
+
+/* ==========================================================================
+   Decorative glass & water layers
+   Purely presentational; positioned in % of the section box so the section's
+   overflow:hidden can clip them without any risk of widening the document.
+   ========================================================================== */
+
+.deco {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.deco-layer {
+  position: absolute;
+  pointer-events: none;
+  /* initDecoParallax writes transform here every frame while active */
+}
+
+/* Compositing is granted only while the section is near the viewport */
+.deco.is-active .deco-layer {
+  will-change: transform;
+}
+
+/* --- A. #about — droplet cluster hugging the right margin ---
+   Kept clear of the copy column: body text sits directly on the section
+   background with nothing opaque behind it. (Overlapping the cards is fine —
+   they have solid backgrounds and .container sits above the artwork.) */
+.deco--about .deco-a1 { top: 4%;  right: -6%; width: 220px; height: 220px; }
+.deco--about .deco-a2 { top: 42%; right: -4%; width: 120px; height: 120px; }
+.deco--about .deco-a3 { top: 68%; right: 2%;  width: 72px;  height: 72px; }
+
+/* --- B. #services — overlapping glass panes, left edge --- */
+/* Uses the independent `rotate` property, not transform: rotate() — the
+   parallax loop writes `transform` inline, which would overwrite it. */
+.deco--services .deco-b1 { top: 6%;  left: -7%; width: 340px; height: 420px; rotate: -8deg; }
+.deco--services .deco-b2 { top: 34%; left: 4%;  width: 260px; height: 320px; rotate: 4deg; }
+.deco--services .deco-b3 { top: 12%; left: 14%; width: 180px; height: 240px; rotate: -3deg; }
+
+/* --- C. #faq — bubble field, opposite corners --- */
+.deco--faq .deco-c1 { bottom: -4%; left: -3%;  width: 260px; height: 260px; }
+.deco--faq .deco-c2 { top: 2%;     right: 2%;  width: 170px; height: 170px; }
+
+/* --- D. #contact — water-surface ripples along the bottom --- */
+.deco--contact .deco-d1 { bottom: -8%; left: -10%; width: 120%; height: 180px; }
+.deco--contact .deco-d2 { bottom: 2%;  left: -10%; width: 120%; height: 140px; }
+.deco--contact .deco-d3 { top: 8%;     right: 4%;  width: 90px; height: 90px; }
+
+@media (max-width: 900px) {
+  .deco--about .deco-a1 { width: 150px; height: 150px; }
+  .deco--about .deco-a2 { width: 84px;  height: 84px; }
+  .deco--services .deco-b1 { width: 230px; height: 290px; }
+  .deco--services .deco-b2 { width: 175px; height: 215px; }
+  .deco--faq .deco-c1 { width: 180px; height: 180px; }
+  .deco--faq .deco-c2 { width: 120px; height: 120px; }
+}
+
+/* Thin the composition on phones — fewer layers, less to composite */
+@media (max-width: 700px) {
+  .deco-layer[data-mobile="hide"] { display: none; }
+}
+
+/* Lives here, after the reveal transition rule, so the cascade cannot
+   re-enable it (base.css loads before this file). */
+@media (prefers-reduced-motion: reduce) {
+  .js [data-reveal] { transition: none; }
+}

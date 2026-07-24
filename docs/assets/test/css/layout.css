@@ -1,0 +1,322 @@
+/* ==========================================================================
+   Layout — top bar, header/nav, section rhythm, footer, back-to-top
+   ========================================================================== */
+
+/* ---------- Top bar ---------- */
+#topbar {
+  background: var(--color-bg-alt);
+  border-bottom: 1px solid var(--color-border);
+  font-size: var(--fs-sm);
+  color: var(--color-text-muted);
+  /* Fixed height — the hero subtracts --topbar-h to end exactly at the fold */
+  height: var(--topbar-h);
+}
+
+#topbar .container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-md);
+  height: 100%;
+}
+
+#topbar .contact-info {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+}
+
+#topbar .contact-info a,
+#topbar .contact-info span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--color-text-muted);
+}
+#topbar .contact-info a:hover { color: var(--color-accent); }
+#topbar .contact-info svg { width: 15px; height: 15px; color: var(--color-accent); }
+
+#topbar .social-links {
+  display: flex;
+  gap: var(--space-xs);
+}
+#topbar .social-links a {
+  color: var(--color-text-muted);
+  display: inline-flex;
+}
+#topbar .social-links a:hover { color: var(--color-accent); }
+#topbar .social-links svg { width: 16px; height: 16px; }
+
+@media (max-width: 720px) {
+  #topbar .social-links { display: none; }
+}
+
+/* ---------- Header ---------- */
+#header {
+  position: sticky;
+  top: 0;
+  z-index: 60;
+  height: var(--header-h);
+  display: flex;
+  align-items: center;
+  background: transparent;
+  transition: background-color var(--dur-base) var(--ease-out),
+              box-shadow var(--dur-base) var(--ease-out),
+              backdrop-filter var(--dur-base) var(--ease-out);
+}
+
+#header.is-scrolled {
+  background: var(--color-header-bg);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  box-shadow: var(--shadow-sm);
+}
+
+#header .header-inner {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-md);
+}
+
+#header .logo img {
+  height: 40px;
+  width: auto;
+  display: block;
+}
+
+/* The wordmark is solid black artwork — flip it so it reads on a dark background */
+@media (prefers-color-scheme: dark) {
+  #header .logo img { filter: invert(1); }
+}
+
+.nav-menu ul {
+  display: flex;
+  align-items: center;
+  gap: var(--space-lg);
+}
+
+.nav-menu a {
+  color: var(--color-text);
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: var(--fs-sm);
+  letter-spacing: 0.01em;
+  padding: var(--space-2xs) 0;
+  position: relative;
+}
+
+.nav-menu a::after {
+  content: "";
+  position: absolute;
+  left: 0; right: 100%;
+  bottom: -2px;
+  height: 2px;
+  background: var(--color-accent);
+  transition: right var(--dur-base) var(--ease-out);
+}
+
+.nav-menu a:hover,
+.nav-menu a.active { color: var(--color-accent); }
+.nav-menu a:hover::after,
+.nav-menu a.active::after { right: 0; }
+
+.nav-toggle {
+  display: none;
+  background: none;
+  border: none;
+  padding: var(--space-2xs);
+  cursor: pointer;
+  color: var(--color-text);
+}
+.nav-toggle svg { width: 26px; height: 26px; }
+
+@media (max-width: 900px) {
+  .nav-toggle { display: inline-flex; }
+
+  .nav-menu {
+    position: fixed;
+    inset: 0 0 0 30%;
+    z-index: 70;
+    background: var(--color-surface);
+    box-shadow: var(--shadow-lg);
+    transform: translateX(100%);
+    transition: transform var(--dur-base) var(--ease-out);
+    padding: calc(var(--header-h) + var(--space-lg)) var(--space-lg) var(--space-lg);
+  }
+  .nav-menu.is-open { transform: translateX(0); }
+
+  .nav-menu ul {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-md);
+  }
+
+  .nav-menu a { font-size: var(--fs-lg); }
+
+  .nav-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 65;
+    background: var(--color-overlay);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity var(--dur-base) var(--ease-out);
+  }
+  .nav-backdrop.is-open {
+    opacity: 1;
+    pointer-events: auto;
+  }
+}
+
+/* ---------- Section rhythm ---------- */
+/* Scoped to content sections so #topbar / #hero keep their own sizing.
+   overflow:hidden clips the decorative artwork that deliberately bleeds past
+   the section edges, so it can never widen the document. Note this makes each
+   section a scroll container — anything that needs to escape one (a sticky
+   sidebar, a popover) would be silently clipped. */
+main > section {
+  padding-block: var(--section-pad);
+  position: relative;
+  overflow: hidden;
+}
+
+/* Keep content above the decorative layers */
+main > section > .container {
+  position: relative;
+  z-index: 1;
+}
+
+section[id] { scroll-margin-top: var(--header-h); }
+
+.section-bg { background: var(--color-bg-alt); }
+
+/* Soften the hard edge where a tinted band meets the page background */
+.section-bg::before,
+.section-bg::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 48px;
+  pointer-events: none;
+  z-index: 0;
+}
+.section-bg::before {
+  top: 0;
+  background: linear-gradient(to bottom, var(--color-bg), transparent);
+}
+.section-bg::after {
+  bottom: 0;
+  background: linear-gradient(to top, var(--color-bg), transparent);
+}
+
+/* ---------- Footer ---------- */
+#footer {
+  background: var(--color-footer-bg);
+  color: var(--color-footer-text);
+}
+
+#footer .footer-top {
+  padding-block: var(--space-xl);
+  border-bottom: 1px solid var(--color-footer-rule);
+}
+
+#footer .footer-grid {
+  display: grid;
+  grid-template-columns: 1.4fr 1fr 1fr 1.2fr;
+  gap: var(--space-lg);
+}
+
+@media (max-width: 900px) {
+  #footer .footer-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+@media (max-width: 560px) {
+  #footer .footer-grid { grid-template-columns: 1fr; }
+}
+
+#footer h3, #footer h4 {
+  color: var(--color-footer-text);
+}
+
+#footer h4 {
+  font-size: var(--fs-base);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-bottom: var(--space-sm);
+}
+
+#footer p, #footer li { color: var(--color-footer-muted); }
+
+#footer .footer-links li {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-bottom: var(--space-2xs);
+}
+#footer .footer-links li > svg {
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
+  color: var(--color-accent);
+}
+#footer .footer-links a {
+  color: var(--color-footer-muted);
+}
+#footer .footer-links a:hover { color: var(--color-accent-strong); }
+
+#footer .social-links {
+  display: flex;
+  gap: var(--space-xs);
+  margin-top: var(--space-sm);
+}
+#footer .social-links a {
+  display: inline-flex;
+  width: 36px; height: 36px;
+  align-items: center; justify-content: center;
+  border-radius: var(--radius-pill);
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--color-footer-text);
+}
+#footer .social-links a:hover { background: var(--color-accent); }
+#footer .social-links svg { width: 16px; height: 16px; }
+
+#footer .footer-bottom {
+  padding-block: var(--space-sm);
+  text-align: center;
+  font-size: var(--fs-sm);
+  color: var(--color-footer-muted);
+}
+
+/* ---------- Back to top ---------- */
+.back-to-top {
+  position: fixed;
+  right: var(--space-md);
+  bottom: var(--space-md);
+  z-index: 80;
+  width: 46px;
+  height: 46px;
+  border-radius: var(--radius-pill);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-accent);
+  color: #fff;
+  box-shadow: var(--shadow-md);
+  opacity: 0;
+  transform: translateY(12px);
+  pointer-events: none;
+  transition: opacity var(--dur-base) var(--ease-out),
+              transform var(--dur-base) var(--ease-out),
+              background var(--dur-fast) var(--ease-out);
+}
+.back-to-top.is-visible {
+  opacity: 1;
+  transform: none;
+  pointer-events: auto;
+}
+.back-to-top:hover { background: var(--color-accent-strong); }
+.back-to-top svg { width: 20px; height: 20px; }
