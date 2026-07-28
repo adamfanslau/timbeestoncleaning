@@ -67,6 +67,9 @@
 
   /* Motion */
   --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  /* Symmetric sine-like curve — for looping ambient motion, where an
+     ease-out would make every cycle visibly restart */
+  --ease-soft: cubic-bezier(0.45, 0, 0.55, 1);
   --dur-fast: 180ms;
   --dur-base: 320ms;
   --dur-slow: 600ms;

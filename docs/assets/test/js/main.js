@@ -14,14 +14,19 @@
     var backdrop = document.querySelector(".nav-backdrop");
     if (!toggle || !menu) return;
 
+    // .nav-open on <body> drives the scroll lock and lifts #header above the
+    // drawer — the drawer lives inside the header's stacking context, so it
+    // cannot outrank the rest of the page chrome on its own.
     function closeMenu() {
       menu.classList.remove("is-open");
       if (backdrop) backdrop.classList.remove("is-open");
+      document.body.classList.remove("nav-open");
       toggle.setAttribute("aria-expanded", "false");
     }
     function openMenu() {
       menu.classList.add("is-open");
       if (backdrop) backdrop.classList.add("is-open");
+      document.body.classList.add("nav-open");
       toggle.setAttribute("aria-expanded", "true");
     }
 
@@ -33,6 +38,17 @@
     menu.querySelectorAll("a").forEach(function (link) {
       link.addEventListener("click", closeMenu);
     });
+
+    document.addEventListener("keydown", function (e) {
+      if (e.key === "Escape") closeMenu();
+    });
+
+    // Widening past the breakpoint turns the drawer back into the desktop
+    // bar; without this the body would stay scroll-locked.
+    var desktop = window.matchMedia("(min-width: 901px)");
+    var onBreakpoint = function (e) { if (e.matches) closeMenu(); };
+    if (desktop.addEventListener) desktop.addEventListener("change", onBreakpoint);
+    else if (desktop.addListener) desktop.addListener(onBreakpoint);
 
     var navLinks = document.querySelectorAll(".nav-menu a[href^='#']");
     var sections = [];
@@ -338,6 +354,10 @@
     var blocks = Array.prototype.slice.call(document.querySelectorAll(".deco"));
     if (!blocks.length || !("IntersectionObserver" in window)) return;
 
+    // Tells the stylesheet that .is-active is being maintained, so it is safe
+    // to park the ambient animations on sections that are off screen.
+    document.documentElement.classList.add("deco-live");
+
     var cache = [];
     var needsUpdate = true;
     var ticking = false;
@@ -361,7 +381,14 @@
           // property, so it reads undefined on every one of them.
           .filter(function (el) { return el.getClientRects().length > 0; })
           .map(function (el) {
-            return { el: el, depth: parseFloat(el.getAttribute("data-depth") || 0) * scale };
+            return {
+              el: el,
+              depth: parseFloat(el.getAttribute("data-depth") || 0) * scale,
+              // Optional lateral component. Layers that also drift sideways
+              // read as further off-axis, which deepens the effect without
+              // any extra per-frame work.
+              depthX: parseFloat(el.getAttribute("data-depth-x") || 0) * scale,
+            };
           });
         return {
           deco: deco,
@@ -393,7 +420,8 @@
         for (var j = 0; j < c.layers.length; j++) {
           var layer = c.layers[j];
           layer.el.style.transform =
-            "translate3d(0," + (p * layer.depth).toFixed(2) + "px,0)";
+            "translate3d(" + (p * layer.depthX).toFixed(2) + "px," +
+            (p * layer.depth).toFixed(2) + "px,0)";
         }
       }
     }

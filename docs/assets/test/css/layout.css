@@ -43,15 +43,31 @@
 }
 
 /* Theme switch — a pill that slides a knob between sun and moon.
-   It is a real <button> with aria-pressed, so it is keyboard and SR usable. */
+   It is a real <button> with aria-pressed, so it is keyboard and SR usable.
+
+   The geometry is derived, not guessed, so the knob lands concentric with
+   whichever icon it covers. With border-box sizing the padding box is
+   (--switch-w − 2 × border) wide; the knob starts --switch-gap in and
+   travels the remainder, and space-between drops each icon's centre on a
+   knob centre. Change one variable and the rest stays aligned. */
 .theme-toggle {
+  --switch-w: 58px;
+  --switch-h: 28px;
+  --switch-gap: 2px;   /* knob inset from the pill's padding box */
+  --switch-knob: 22px;
+  --switch-icon: 14px;
+  /* Padding box width (−2px for the borders) − knob − a gap at each end */
+  --switch-travel: calc(var(--switch-w) - 2px - var(--switch-knob) - 2 * var(--switch-gap));
+  /* Puts each icon's centre on a knob centre, given justify-content:space-between */
+  --switch-pad: calc(var(--switch-gap) + (var(--switch-knob) - var(--switch-icon)) / 2);
+
   position: relative;
   display: inline-flex;
   align-items: center;
-  gap: 4px;
-  width: 58px;
-  height: 28px;
-  padding: 0 6px;
+  justify-content: space-between;
+  width: var(--switch-w);
+  height: var(--switch-h);
+  padding: 0 var(--switch-pad);
   border-radius: var(--radius-pill);
   border: 1px solid var(--color-border);
   background: var(--color-surface);
@@ -63,8 +79,8 @@
 .theme-toggle:hover { border-color: var(--color-accent); }
 
 .theme-toggle svg {
-  width: 14px;
-  height: 14px;
+  width: var(--switch-icon);
+  height: var(--switch-icon);
   position: relative;
   z-index: 1;
   transition: color var(--dur-base) var(--ease-out),
@@ -81,14 +97,14 @@
   content: "";
   position: absolute;
   top: 50%;
-  left: 3px;
-  width: 22px;
-  height: 22px;
-  margin-top: -11px;
+  left: var(--switch-gap);
+  width: var(--switch-knob);
+  height: var(--switch-knob);
+  margin-top: calc(var(--switch-knob) / -2);
   border-radius: 50%;
   background: var(--color-accent-tint);
   border: 1px solid var(--color-accent);
-  transform: translateX(26px);
+  transform: translateX(var(--switch-travel));
   transition: transform var(--dur-base) var(--ease-back);
 }
 :root[data-theme="light"] .theme-toggle::after { transform: translateX(0); }
@@ -121,17 +137,28 @@
   display: flex;
   align-items: center;
   background: transparent;
-  transition: background-color var(--dur-base) var(--ease-out),
-              box-shadow var(--dur-base) var(--ease-out),
-              backdrop-filter var(--dur-base) var(--ease-out);
 }
 
-#header.is-scrolled {
+/* The frosted plate lives on a pseudo-element and NEVER on #header itself:
+   backdrop-filter makes an element a containing block for position:fixed
+   descendants, which would shrink the mobile nav drawer and its backdrop
+   from the viewport down to this 76px-tall box the moment the header
+   picked up .is-scrolled. Fading opacity also animates cleanly, which
+   backdrop-filter does not. */
+#header::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
   background: var(--color-header-bg);
   backdrop-filter: blur(14px);
   -webkit-backdrop-filter: blur(14px);
   box-shadow: var(--shadow-sm);
+  opacity: 0;
+  transition: opacity var(--dur-base) var(--ease-out);
 }
+
+#header.is-scrolled::before { opacity: 1; }
 
 #header .header-inner {
   width: 100%;
@@ -193,18 +220,36 @@
 }
 .nav-toggle svg { width: 26px; height: 26px; }
 
+/* One button, two glyphs — the open state shows the close icon */
+.nav-toggle .icon-close { display: none; }
+.nav-toggle[aria-expanded="true"] .icon-open { display: none; }
+.nav-toggle[aria-expanded="true"] .icon-close { display: block; }
+
 @media (max-width: 900px) {
-  .nav-toggle { display: inline-flex; }
+  .nav-toggle {
+    display: inline-flex;
+    /* Above the drawer, so the same button also closes it. Only works
+       because .nav-open lifts #header's own z-index past the drawer. */
+    position: relative;
+    z-index: 75;
+  }
 
   .nav-menu {
     position: fixed;
-    inset: 0 0 0 30%;
+    top: 0;
+    bottom: 0;
+    right: 0;
+    left: auto;
+    width: min(320px, 82vw);
     z-index: 70;
     background: var(--color-surface);
+    border-left: 1px solid var(--color-border);
     box-shadow: var(--shadow-lg);
     transform: translateX(100%);
     transition: transform var(--dur-base) var(--ease-out);
     padding: calc(var(--header-h) + var(--space-lg)) var(--space-lg) var(--space-lg);
+    overflow-y: auto;
+    overscroll-behavior: contain;
   }
   .nav-menu.is-open { transform: translateX(0); }
 
@@ -228,6 +273,15 @@
   .nav-backdrop.is-open {
     opacity: 1;
     pointer-events: auto;
+  }
+
+  /* #header is a stacking context at z-index 60, so the drawer inside it
+     can only outrank page chrome if the header itself is lifted first. */
+  body.nav-open { overflow: hidden; }
+  body.nav-open #header { z-index: 80; }
+  body.nav-open .back-to-top {
+    opacity: 0;
+    pointer-events: none;
   }
 }
 

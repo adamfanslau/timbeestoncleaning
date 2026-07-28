@@ -588,37 +588,174 @@
   will-change: transform;
 }
 
+/* ---------- Ambient motion ----------
+ * Two independent motion systems share these elements:
+ *   scroll parallax  → JS writes `transform`
+ *   ambient loops    → CSS animates `translate` / `rotate` / `scale`
+ * They must stay on separate properties. The independent transform
+ * properties are applied before `transform` and compose with it, so an
+ * animation here can never be clobbered by the per-frame parallax write
+ * (and vice versa). Nothing animates layout or paint — every property
+ * below is compositor-only.
+ *
+ * Each class sets a default duration; individual layers override
+ * animation-duration / -delay so no two shapes ever move in lockstep.
+ */
+@media (prefers-reduced-motion: no-preference) {
+  .deco-float   { animation: deco-float 15s var(--ease-soft) infinite; }
+  .deco-drift   { animation: deco-drift 24s var(--ease-soft) infinite; }
+  .deco-breathe { animation: deco-breathe 13s var(--ease-soft) infinite; }
+  .deco-twinkle { animation: deco-twinkle 7s var(--ease-soft) infinite; }
+  .deco-rise    { animation: deco-rise 26s linear infinite; }
+  .deco-wave    { animation: deco-wave 19s var(--ease-soft) infinite; }
+  .deco-wipe    { animation: deco-wipe 17s var(--ease-soft) infinite; }
+
+  /* Rotating dashed rings. stroke-dashoffset inherits into the <use>
+     shadow tree, which is the only way to reach the geometry from here. */
+  .deco-rings {
+    stroke-dasharray: 13 11;
+    animation: deco-spin 120s linear infinite,
+               deco-dash 14s linear infinite;
+  }
+
+  /* The panes carry a static tilt, so their sway has to be authored around
+     each one's own resting angle — `rotate` cannot be animated relatively. */
+  .deco-tilt-a { animation: deco-tilt-a 21s var(--ease-soft) infinite; }
+  .deco-tilt-b { animation: deco-tilt-b 27s var(--ease-soft) infinite; }
+  .deco-tilt-c { animation: deco-tilt-c 18s var(--ease-soft) infinite; }
+}
+
+/* Off-screen sections cost nothing: the same IntersectionObserver that
+   gates the parallax also parks the ambient loops. Scoped to .deco-live so
+   a browser without IntersectionObserver (where the observer never runs)
+   is left with running animations rather than permanently frozen ones. */
+.deco-live .deco:not(.is-active) .deco-layer {
+  animation-play-state: paused;
+}
+
+@keyframes deco-float {
+  0%, 100% { translate: 0 0; }
+  50%      { translate: 0 -20px; }
+}
+@keyframes deco-drift {
+  0%, 100% { translate: 0 0; }
+  33%      { translate: 16px -12px; }
+  66%      { translate: -10px -22px; }
+}
+@keyframes deco-breathe {
+  0%, 100% { scale: 1; }
+  50%      { scale: 1.07; }
+}
+@keyframes deco-twinkle {
+  0%, 100% { opacity: 0.15; scale: 0.7; }
+  50%      { opacity: 1;    scale: 1.15; }
+}
+/* Bubbles enter below their box and leave above it, fading at both ends so
+   the loop has no visible seam */
+@keyframes deco-rise {
+  0%   { translate: 0 45%;   opacity: 0; }
+  12%  { opacity: 1; }
+  82%  { opacity: 1; }
+  100% { translate: 0 -260%; opacity: 0; }
+}
+@keyframes deco-wave {
+  0%, 100% { translate: -3% 0; }
+  50%      { translate: 3% -6px; }
+}
+@keyframes deco-wipe {
+  0%       { translate: -18% 0; opacity: 0; }
+  20%, 70% { opacity: 1; }
+  100%     { translate: 20% 0;  opacity: 0; }
+}
+@keyframes deco-spin {
+  to { rotate: 360deg; }
+}
+@keyframes deco-dash {
+  to { stroke-dashoffset: -96; }
+}
+@keyframes deco-tilt-a {
+  0%, 100% { rotate: -8deg; }
+  50%      { rotate: -4.5deg; }
+}
+@keyframes deco-tilt-b {
+  0%, 100% { rotate: 4deg; }
+  50%      { rotate: 1deg; }
+}
+@keyframes deco-tilt-c {
+  0%, 100% { rotate: -3deg; }
+  50%      { rotate: -6deg; }
+}
+
+/* --- Hero — bubbles rising over the photography ---
+   z-index 1 puts these above the slide image and its scrim (both 0–1) but
+   under .hero-content and .hero-controls, so nothing readable is touched. */
+.deco--hero { z-index: 1; }
+.deco--hero .deco-h1 { bottom: -12%; left: 7%;   width: 120px; height: 200px; animation-duration: 24s; }
+.deco--hero .deco-h2 { bottom: -16%; right: 14%; width: 88px;  height: 148px; animation-duration: 31s; animation-delay: -11s; }
+.deco--hero .deco-h3 { top: 24%;     right: 27%; width: 26px;  height: 26px;  animation-duration: 6.5s; }
+.deco--hero .deco-h4 { top: 58%;     right: 9%;  width: 18px;  height: 18px;  animation-duration: 9s; animation-delay: -3s; }
+
 /* --- A. #about — droplet cluster hugging the right margin ---
    Kept clear of the copy column: body text sits directly on the section
    background with nothing opaque behind it. (Overlapping the cards is fine —
    they have solid backgrounds and .container sits above the artwork.) */
-.deco--about .deco-a1 { top: 4%;  right: -6%; width: 220px; height: 220px; }
-.deco--about .deco-a2 { top: 42%; right: -4%; width: 120px; height: 120px; }
-.deco--about .deco-a3 { top: 68%; right: 2%;  width: 72px;  height: 72px; }
+.deco--about .deco-a1 { top: 4%;  right: -6%; width: 220px; height: 220px; animation-duration: 18s; }
+.deco--about .deco-a2 { top: 42%; right: -4%; width: 120px; height: 120px; animation-duration: 13s; animation-delay: -5s; }
+.deco--about .deco-a3 { top: 68%; right: 2%;  width: 72px;  height: 72px;  animation-duration: 21s; }
+.deco--about .deco-a4 { top: 27%; right: 17%; width: 22px;  height: 22px;  animation-duration: 8s; animation-delay: -2s; }
+.deco--about .deco-a5 { bottom: -2%; left: -10%; width: 120%; height: 120px; animation-duration: 23s; }
 
 /* --- B. #services — overlapping glass panes, left edge --- */
 /* Uses the independent `rotate` property, not transform: rotate() — the
-   parallax loop writes `transform` inline, which would overwrite it. */
+   parallax loop writes `transform` inline, which would overwrite it. The
+   .deco-tilt-* animations sway each pane around the resting angle set here;
+   under reduced motion the animation drops out and this angle remains. */
 .deco--services .deco-b1 { top: 6%;  left: -7%; width: 340px; height: 420px; rotate: -8deg; }
 .deco--services .deco-b2 { top: 34%; left: 4%;  width: 260px; height: 320px; rotate: 4deg; }
 .deco--services .deco-b3 { top: 12%; left: 14%; width: 180px; height: 240px; rotate: -3deg; }
+/* The squeegee wipes across the panes it belongs to */
+.deco--services .deco-b4 { top: 22%; left: -4%;  width: 300px; height: 60px; animation-duration: 16s; }
+.deco--services .deco-b5 { top: 46%; right: -5%; width: 220px; height: 220px; animation-duration: 15s; animation-delay: -6s; }
+.deco--services .deco-b6 { top: 14%; right: 12%; width: 24px;  height: 24px; animation-duration: 7.5s; animation-delay: -4s; }
 
 /* --- C. #faq — bubble field, opposite corners --- */
-.deco--faq .deco-c1 { bottom: -4%; left: -3%;  width: 260px; height: 260px; }
-.deco--faq .deco-c2 { top: 2%;     right: 2%;  width: 170px; height: 170px; }
+.deco--faq .deco-c1 { bottom: -4%; left: -3%;  width: 260px; height: 260px; animation-duration: 16s; }
+.deco--faq .deco-c2 { top: 2%;     right: 2%;  width: 170px; height: 170px; animation-duration: 26s; animation-delay: -8s; }
+.deco--faq .deco-c3 { top: -18%;   left: 36%;  width: 300px; height: 300px; animation-duration: 140s; }
+.deco--faq .deco-c4 { bottom: 14%; right: 22%; width: 20px;  height: 20px;  animation-duration: 6s; animation-delay: -1.5s; }
 
 /* --- D. #contact — water-surface ripples along the bottom --- */
-.deco--contact .deco-d1 { bottom: -8%; left: -10%; width: 120%; height: 180px; }
-.deco--contact .deco-d2 { bottom: 2%;  left: -10%; width: 120%; height: 140px; }
-.deco--contact .deco-d3 { top: 8%;     right: 4%;  width: 90px; height: 90px; }
+.deco--contact .deco-d1 { bottom: -8%; left: -10%; width: 120%; height: 180px; animation-duration: 21s; }
+.deco--contact .deco-d2 { bottom: 2%;  left: -10%; width: 120%; height: 140px; animation-duration: 17s; animation-delay: -7s; }
+.deco--contact .deco-d3 { top: 8%;     right: 4%;  width: 90px; height: 90px;  animation-duration: 14s; }
+.deco--contact .deco-d4 { bottom: -20%; left: 8%;  width: 100px; height: 170px; animation-duration: 29s; animation-delay: -14s; }
+.deco--contact .deco-d5 { top: 18%;    left: 12%;  width: 20px; height: 20px;  animation-duration: 8.5s; }
+
+/* --- E. #portfolio — rings and glints around the photo strip --- */
+.deco--portfolio .deco-e1 { top: -14%;  left: -8%;  width: 320px; height: 320px; animation-duration: 130s; }
+.deco--portfolio .deco-e2 { top: 12%;   right: 5%;  width: 96px;  height: 96px;  animation-duration: 17s; }
+.deco--portfolio .deco-e3 { bottom: 18%; right: 14%; width: 24px;  height: 24px;  animation-duration: 6.8s; animation-delay: -2.5s; }
+.deco--portfolio .deco-e4 { bottom: 6%;  right: -6%; width: 280px; height: 56px;  animation-duration: 19s; animation-delay: -9s; }
+
+/* --- F. #team — rings behind the portraits, ripple underfoot --- */
+.deco--team .deco-f1 { top: -20%;   right: -6%; width: 300px; height: 300px; animation-duration: 150s; }
+.deco--team .deco-f2 { bottom: 4%;  left: -10%; width: 120%;  height: 130px; animation-duration: 22s; }
+.deco--team .deco-f3 { top: 16%;    left: -4%;  width: 190px; height: 190px; animation-duration: 27s; animation-delay: -10s; }
+.deco--team .deco-f4 { top: 30%;    left: 22%;  width: 18px;  height: 18px;  animation-duration: 7s; }
 
 @media (max-width: 900px) {
   .deco--about .deco-a1 { width: 150px; height: 150px; }
   .deco--about .deco-a2 { width: 84px;  height: 84px; }
   .deco--services .deco-b1 { width: 230px; height: 290px; }
   .deco--services .deco-b2 { width: 175px; height: 215px; }
+  .deco--services .deco-b5 { width: 150px; height: 150px; }
   .deco--faq .deco-c1 { width: 180px; height: 180px; }
   .deco--faq .deco-c2 { width: 120px; height: 120px; }
+  .deco--faq .deco-c3 { width: 210px; height: 210px; }
+  .deco--portfolio .deco-e1 { width: 210px; height: 210px; }
+  .deco--portfolio .deco-e2 { width: 68px;  height: 68px; }
+  .deco--team .deco-f1 { width: 200px; height: 200px; }
+  .deco--team .deco-f3 { width: 130px; height: 130px; }
 }
 
 /* Thin the composition on phones — fewer layers, less to composite */
