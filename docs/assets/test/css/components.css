@@ -49,6 +49,34 @@
   transform: translateY(-2px);
   box-shadow: var(--shadow-md);
 }
+/* WhatsApp keeps its own brand green so the button is recognisable at a
+   glance, but pairs it with near-black rather than the white WhatsApp uses
+   in-app — white on #25D366 is only ~2.2:1, which this text size fails. */
+.btn-whatsapp {
+  background: #25D366;
+  color: #06281A;
+  box-shadow: var(--shadow-sm);
+}
+.btn-whatsapp:hover {
+  background: #1EBE5B;
+  color: #06281A;
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+.btn-whatsapp .icon { width: 1.15em; height: 1.15em; }
+
+.contact-cta {
+  margin-top: var(--space-lg);
+  text-align: center;
+}
+.contact-cta-note {
+  margin-top: var(--space-2xs);
+  font-size: var(--fs-sm);
+  color: var(--color-text-muted);
+  max-width: 46ch;
+  margin-inline: auto;
+}
+
 .btn-ghost {
   background: rgba(255, 255, 255, 0.12);
   color: #fff;

@@ -59,14 +59,8 @@
       <symbol id="icon-x" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
         <path d="M4 4l16 16M20 4L4 20"/>
       </symbol>
-      <symbol id="icon-facebook" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M15 8.5h-1.8c-.7 0-1.2.5-1.2 1.2V11.5h3l-.4 3h-2.6v7h-3v-7H7v-3h1.8V9.3C8.8 7 10.3 5.5 12.5 5.5h2.5v3z"/>
-      </symbol>
       <symbol id="icon-instagram" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
         <rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.3" cy="6.7" r="0.9" fill="currentColor" stroke="none"/>
-      </symbol>
-      <symbol id="icon-linkedin" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-        <rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="7" cy="6.8" r="1" fill="currentColor" stroke="none"/><line x1="7" y1="10.2" x2="7" y2="17"/><line x1="11.2" y1="10.2" x2="11.2" y2="17"/><path d="M11.2 13c0-1.7 1.1-2.8 2.6-2.8s2.5 1 2.5 2.7V17"/>
       </symbol>
       <symbol id="icon-chevron-right" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
         <path d="M9 5l7 7-7 7"/>
@@ -79,6 +73,12 @@
       </symbol>
       <symbol id="icon-chat" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
         <path d="M21 12a8.5 8.5 0 0 1-8.5 8.5c-1.3 0-2.5-.3-3.6-.8L3 21l1.3-5A8.5 8.5 0 1 1 21 12z"/>
+      </symbol>
+      <!-- Filled, unlike the line icons around it: the handset-in-a-bubble only
+           reads as WhatsApp at small sizes when it keeps the solid mark. -->
+      <symbol id="icon-whatsapp" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M17.47 14.38c-.3-.15-1.76-.87-2.03-.97-.27-.1-.47-.15-.67.15-.2.3-.77.97-.94 1.16-.17.2-.35.22-.64.08-.3-.15-1.26-.47-2.39-1.48-.89-.79-1.48-1.76-1.66-2.06-.17-.3-.02-.46.13-.61.14-.13.3-.35.45-.52.15-.17.2-.3.3-.5.1-.2.05-.37-.03-.52-.07-.15-.66-1.61-.91-2.2-.24-.58-.49-.5-.67-.51h-.57c-.2 0-.52.07-.8.37-.27.3-1.03 1.02-1.03 2.48s1.06 2.87 1.21 3.07c.15.2 2.1 3.2 5.08 4.49.71.3 1.26.49 1.69.62.71.23 1.36.2 1.87.12.57-.09 1.76-.72 2-1.41.25-.7.25-1.29.18-1.42-.08-.12-.27-.2-.57-.34"/>
+        <path d="M12.05 21.79h-.01a9.87 9.87 0 0 1-5.03-1.38l-.36-.21-3.74.98 1-3.65-.24-.37a9.86 9.86 0 0 1-1.51-5.26A9.88 9.88 0 0 1 18.94 5.1a9.83 9.83 0 0 1 2.9 6.99c0 5.45-4.44 9.7-9.79 9.7m8.4-18.09A11.8 11.8 0 0 0 12.05 0C5.5 0 .17 5.34.17 11.89c0 2.1.55 4.14 1.6 5.95L.07 24l6.3-1.65a11.86 11.86 0 0 0 5.67 1.45h.01c6.55 0 11.88-5.33 11.88-11.89 0-3.17-1.23-6.16-3.48-8.4"/>
       </symbol>
       <symbol id="icon-home" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
         <path d="M4 11.5L12 4l8 7.5"/><path d="M6 10v9a1 1 0 0 0 1 1h3v-5h4v5h3a1 1 0 0 0 1-1v-9"/>
@@ -220,16 +220,17 @@
   <!-- ======= Top Bar ======= -->
   <section id="topbar">
     <div class="container">
+      <!-- Labels collapse to icon-only below 720px (see layout.css); they stay
+           in the DOM so screen readers keep reading the address / number. -->
       <div class="contact-info">
-        <a href="mailto:timbeeston@me.com"><svg class="icon"><use href="#icon-mail"></use></svg> timbeeston@me.com</a>
-        <a href="tel:+353872224117"><svg class="icon"><use href="#icon-phone"></use></svg> 087 222 4117</a>
+        <a href="mailto:timbeeston@me.com"><svg class="icon" aria-hidden="true"><use href="#icon-mail"></use></svg> <span class="label">timbeeston@me.com</span></a>
+        <a href="tel:+353872224117"><svg class="icon" aria-hidden="true"><use href="#icon-phone"></use></svg> <span class="label">087 222 4117</span></a>
+        <a class="contact-whatsapp" href="https://wa.me/353872224117?text=Hi%20Tim%2C%20I%27d%20like%20a%20quote%20for%20cleaning%20please."
+           target="_blank" rel="noopener"><svg class="icon" aria-hidden="true"><use href="#icon-whatsapp"></use></svg> <span class="label">WhatsApp</span></a>
       </div>
       <div class="topbar-actions">
         <div class="social-links">
-          <a href="https://twitter.com/tim_beeston" aria-label="Twitter / X"><svg class="icon"><use href="#icon-x"></use></svg></a>
-          <a href="https://www.facebook.com/timbeestoncleaning" aria-label="Facebook"><svg class="icon"><use href="#icon-facebook"></use></svg></a>
           <a href="https://www.instagram.com/timbeestoncleaning/" aria-label="Instagram"><svg class="icon"><use href="#icon-instagram"></use></svg></a>
-          <a href="https://www.linkedin.com/in/tim-beeston-8a062313/" aria-label="LinkedIn"><svg class="icon"><use href="#icon-linkedin"></use></svg></a>
         </div>
         <button type="button" class="theme-toggle" id="theme-toggle"
                 aria-label="Switch to light theme" aria-pressed="true" title="Switch theme">
@@ -251,8 +252,8 @@
       <nav class="nav-menu" aria-label="Primary">
         <ul>
           <li><a href="#hero" class="active">Home</a></li>
-          <li><a href="#about">About Us</a></li>
           <li><a href="#services">Services</a></li>
+          <li><a href="#about">About Us</a></li>
           <li><a href="#portfolio">Gallery</a></li>
           <li><a href="#team">Team</a></li>
           <li><a href="#contact">Contact Us</a></li>
@@ -329,49 +330,8 @@
 
   <main id="main">
 
-    <!-- ======= About Us ======= -->
-    <section id="about">
-      <div class="deco deco--about" aria-hidden="true">
-        <svg class="deco-layer deco-a1 deco-float" data-depth="90" data-depth-x="14" data-mobile="hide" focusable="false"><use href="#deco-droplet"></use></svg>
-        <svg class="deco-layer deco-a2 deco-float" data-depth="55" focusable="false"><use href="#deco-droplet"></use></svg>
-        <svg class="deco-layer deco-a3 deco-drift" data-depth="28" focusable="false"><use href="#deco-droplet"></use></svg>
-        <svg class="deco-layer deco-a4 deco-twinkle" data-depth="40" focusable="false"><use href="#deco-sparkle"></use></svg>
-        <svg class="deco-layer deco-a5 deco-wave" data-depth="18" data-mobile="hide" focusable="false"><use href="#deco-ripple"></use></svg>
-      </div>
-      <div class="container about-grid">
-        <div class="about-media" data-reveal>
-          <picture>
-            <source type="image/webp" srcset="assets/test/img/about.webp">
-            <img src="assets/img/about.jpg" alt="Tim Beeston Cleaning at work, reflected in a freshly cleaned window" width="1024" height="1016" loading="lazy" decoding="async">
-          </picture>
-        </div>
-
-        <div class="about-copy" data-reveal>
-          <span class="eyebrow">Since 1996</span>
-          <h2>About Us</h2>
-          <p>We're a small family business based in the beautiful county of Kerry.</p>
-          <p>Our services include window cleaning, office cleaning, powerwashing and gutter cleaning.</p>
-          <p>We've been around in Killarney since 1996, but have over 30 years' experience in the cleaning industry.</p>
-          <p>Using industry-leading techniques along with the latest technology and equipment helps us keep your property clean.</p>
-
-          <div class="icon-box-grid">
-            <div class="icon-box">
-              <div class="icon"><svg class="icon"><use href="#icon-chat"></use></svg></div>
-              <h4>Advice</h4>
-              <p class="description">We also offer advice on all sorts of cleaning needs. From getting stains out of a carpet to cleaning your own windows, we'll always try to help you out.</p>
-            </div>
-            <div class="icon-box">
-              <div class="icon"><svg class="icon"><use href="#icon-home"></use></svg></div>
-              <h4>Trust Us?</h4>
-              <p class="description">Being trustworthy and honest lets us provide a first-class service and peace of mind. We hold keys and alarm codes to most of our clients' properties in confidence.</p>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-
     <!-- ======= Services ======= -->
-    <section id="services" class="section-bg">
+    <section id="services">
       <div class="deco deco--services" aria-hidden="true">
         <!-- deco-b2 counter-drifts (negative depth) so the panes separate in depth -->
         <svg class="deco-layer deco-b1 deco-tilt-a" data-depth="90" data-mobile="hide" focusable="false"><use href="#deco-pane"></use></svg>
@@ -407,6 +367,47 @@
             <div class="icon"><svg class="icon"><use href="#icon-droplet"></use></svg></div>
             <h4>Powerwashing</h4>
             <p>Using high pressure without chemicals, we can clean any property. Spring cleans, after-tenancy cleans, or just a regular maintenance clean — we have the know-how and equipment to get your property clean.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ======= About Us ======= -->
+    <section id="about" class="section-bg">
+      <div class="deco deco--about" aria-hidden="true">
+        <svg class="deco-layer deco-a1 deco-float" data-depth="90" data-depth-x="14" data-mobile="hide" focusable="false"><use href="#deco-droplet"></use></svg>
+        <svg class="deco-layer deco-a2 deco-float" data-depth="55" focusable="false"><use href="#deco-droplet"></use></svg>
+        <svg class="deco-layer deco-a3 deco-drift" data-depth="28" focusable="false"><use href="#deco-droplet"></use></svg>
+        <svg class="deco-layer deco-a4 deco-twinkle" data-depth="40" focusable="false"><use href="#deco-sparkle"></use></svg>
+        <svg class="deco-layer deco-a5 deco-wave" data-depth="18" data-mobile="hide" focusable="false"><use href="#deco-ripple"></use></svg>
+      </div>
+      <div class="container about-grid">
+        <div class="about-media" data-reveal>
+          <picture>
+            <source type="image/webp" srcset="assets/test/img/about.webp">
+            <img src="assets/img/about.jpg" alt="Tim Beeston Cleaning at work, reflected in a freshly cleaned window" width="1024" height="1016" loading="lazy" decoding="async">
+          </picture>
+        </div>
+
+        <div class="about-copy" data-reveal>
+          <span class="eyebrow">Since 1996</span>
+          <h2>About Us</h2>
+          <p>We're a small family business based in the beautiful county of Kerry.</p>
+          <p>Our services include window cleaning, office cleaning, powerwashing and gutter cleaning.</p>
+          <p>We've been around in Killarney since 1996, but have over 30 years' experience in the cleaning industry.</p>
+          <p>Using industry-leading techniques along with the latest technology and equipment helps us keep your property clean.</p>
+
+          <div class="icon-box-grid">
+            <div class="icon-box">
+              <div class="icon"><svg class="icon"><use href="#icon-chat"></use></svg></div>
+              <h4>Advice</h4>
+              <p class="description">We also offer advice on all sorts of cleaning needs. From getting stains out of a carpet to cleaning your own windows, we'll always try to help you out.</p>
+            </div>
+            <div class="icon-box">
+              <div class="icon"><svg class="icon"><use href="#icon-home"></use></svg></div>
+              <h4>Trust Us?</h4>
+              <p class="description">Being trustworthy and honest lets us provide a first-class service and peace of mind. We hold keys and alarm codes to most of our clients' properties in confidence.</p>
+            </div>
           </div>
         </div>
       </div>
@@ -537,10 +538,7 @@
             <h4>Tim</h4>
             <span class="role">Chief Dosser &amp; coffee consumer</span>
             <div class="social">
-              <a href="https://twitter.com/tim_beeston" aria-label="Tim on Twitter / X"><svg class="icon"><use href="#icon-x"></use></svg></a>
-              <a href="https://www.facebook.com/timbeestoncleaning" aria-label="Tim on Facebook"><svg class="icon"><use href="#icon-facebook"></use></svg></a>
               <a href="https://www.instagram.com/timbeestoncleaning/" aria-label="Tim on Instagram"><svg class="icon"><use href="#icon-instagram"></use></svg></a>
-              <a href="https://www.linkedin.com/in/tim-beeston-8a062313/" aria-label="Tim on LinkedIn"><svg class="icon"><use href="#icon-linkedin"></use></svg></a>
             </div>
           </div>
 
@@ -554,7 +552,6 @@
             <h4>Daragh</h4>
             <span class="role">The actual worker</span>
             <div class="social">
-              <a href="https://twitter.com/daraghbeeston" aria-label="Daragh on Twitter / X"><svg class="icon"><use href="#icon-x"></use></svg></a>
               <a href="https://www.instagram.com/daraghbphotography/" aria-label="Daragh on Instagram"><svg class="icon"><use href="#icon-instagram"></use></svg></a>
             </div>
           </div>
@@ -636,6 +633,17 @@
           </div>
         </div>
 
+        <!-- wa.me takes the number in full international form, digits only -->
+        <div class="contact-cta" data-reveal>
+          <a class="btn btn-whatsapp"
+             href="https://wa.me/353872224117?text=Hi%20Tim%2C%20I%27d%20like%20a%20quote%20for%20cleaning%20please."
+             target="_blank" rel="noopener">
+            <svg class="icon" aria-hidden="true"><use href="#icon-whatsapp"></use></svg>
+            Message us on WhatsApp
+          </a>
+          <p class="contact-cta-note">Opens a chat with 087 222 4117 — tell us what needs cleaning and we'll come back with a price.</p>
+        </div>
+
       </div>
     </section>
 
@@ -655,10 +663,7 @@
             <strong>Email:</strong> <a href="mailto:timbeeston@me.com">timbeeston@me.com</a>
           </p>
           <div class="social-links">
-            <a href="https://twitter.com/tim_beeston" aria-label="Twitter / X"><svg class="icon"><use href="#icon-x"></use></svg></a>
-            <a href="https://www.facebook.com/timbeestoncleaning" aria-label="Facebook"><svg class="icon"><use href="#icon-facebook"></use></svg></a>
             <a href="https://www.instagram.com/timbeestoncleaning/" aria-label="Instagram"><svg class="icon"><use href="#icon-instagram"></use></svg></a>
-            <a href="https://www.linkedin.com/in/tim-beeston-8a062313/" aria-label="LinkedIn"><svg class="icon"><use href="#icon-linkedin"></use></svg></a>
           </div>
         </div>
 
@@ -666,8 +671,8 @@
           <h4>Useful Links</h4>
           <ul>
             <li><svg class="icon"><use href="#icon-chevron-right"></use></svg> <a href="#hero">Home</a></li>
-            <li><svg class="icon"><use href="#icon-chevron-right"></use></svg> <a href="#about">About Us</a></li>
             <li><svg class="icon"><use href="#icon-chevron-right"></use></svg> <a href="#services">Services</a></li>
+            <li><svg class="icon"><use href="#icon-chevron-right"></use></svg> <a href="#about">About Us</a></li>
             <li><svg class="icon"><use href="#icon-chevron-right"></use></svg> <a href="#portfolio">Gallery</a></li>
             <li><svg class="icon"><use href="#icon-chevron-right"></use></svg> <a href="#contact">Contact Us</a></li>
           </ul>

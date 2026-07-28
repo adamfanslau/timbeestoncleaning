@@ -34,7 +34,10 @@
   color: var(--color-text-muted);
 }
 #topbar .contact-info a:hover { color: var(--color-accent); }
-#topbar .contact-info svg { width: 15px; height: 15px; color: var(--color-accent); }
+#topbar .contact-info svg { width: 15px; height: 15px; color: var(--color-accent); flex-shrink: 0; }
+/* The WhatsApp mark is filled, so it reads a shade heavier than the line icons
+   beside it at the same box size — trim it back to match. */
+#topbar .contact-whatsapp svg { width: 14px; height: 14px; }
 
 #topbar .topbar-actions {
   display: flex;
@@ -124,8 +127,22 @@
 #topbar .social-links a:hover { color: var(--color-accent); }
 #topbar .social-links svg { width: 16px; height: 16px; }
 
+/* Mobile: the bar goes icon-only. The labels are clipped rather than
+   display:none so screen readers still announce the address and number,
+   and the roomier gap keeps the three targets tappable. */
 @media (max-width: 720px) {
   #topbar .social-links { display: none; }
+
+  #topbar .contact-info { gap: var(--space-lg); }
+  #topbar .contact-info .label {
+    position: absolute;
+    width: 1px; height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+  }
+  #topbar .contact-info svg { width: 18px; height: 18px; }
+  #topbar .contact-whatsapp svg { width: 17px; height: 17px; }
 }
 
 /* ---------- Header ---------- */
