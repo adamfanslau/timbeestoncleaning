@@ -1,0 +1,7 @@
+# macOS Finder metadata — written into any directory the Finder has opened
+.DS_Store
+._*
+
+# Thumbnails and volume cruft from removable media
+.Spotlight-V100
+.Trashes
