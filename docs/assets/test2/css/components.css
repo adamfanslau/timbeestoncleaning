@@ -168,15 +168,31 @@
 /* A layered scrim instead of a flat wash: a pool of shadow anchored in the
    bottom-left corner where the copy sits, a light top band so the header
    floats, and a soft foot for the carousel controls. The copy column keeps
-   its contrast on every one of the three photographs. */
+   its contrast on every one of the three photographs.
+
+   The pool decays quickly to the right on purpose. The van is the brand's
+   most recognisable asset and its red and yellow turn to maroon and olive
+   under any even wash — so the right half of the frame, where the van sits,
+   is left close to the photographer's own exposure. */
 .hero-slide::after {
   content: "";
   position: absolute;
   inset: 0;
   z-index: 1;
   background:
-    radial-gradient(125% 118% at 6% 102%, rgba(6, 9, 11, 0.92) 0%, rgba(6, 9, 11, 0.60) 40%, rgba(6, 9, 11, 0.22) 62%, transparent 80%),
-    linear-gradient(180deg, rgba(6, 9, 11, 0.62) 0%, rgba(6, 9, 11, 0.10) 32%, rgba(6, 9, 11, 0.30) 68%, rgba(6, 9, 11, 0.78) 100%);
+    radial-gradient(115% 112% at 6% 102%, rgba(6, 9, 11, 0.90) 0%, rgba(6, 9, 11, 0.55) 38%, rgba(6, 9, 11, 0.18) 60%, transparent 78%),
+    linear-gradient(180deg, rgba(6, 9, 11, 0.50) 0%, rgba(6, 9, 11, 0.06) 34%, rgba(6, 9, 11, 0.14) 66%, rgba(6, 9, 11, 0.48) 100%);
+}
+
+/* Opt-in heavier scrim, for a slide whose photograph is bright across the
+   middle of the frame. The decal shot is a close-up of large white lettering
+   sitting exactly where the headline goes; at the default exposure the two
+   sets of white type fight each other. Dimming that slide alone pushes the
+   photograph back into being a background without touching the other two. */
+.hero-slide--dim::after {
+  background:
+    radial-gradient(125% 125% at 8% 100%, rgba(6, 9, 11, 0.94) 0%, rgba(6, 9, 11, 0.74) 40%, rgba(6, 9, 11, 0.52) 66%, rgba(6, 9, 11, 0.38) 100%),
+    linear-gradient(180deg, rgba(6, 9, 11, 0.56) 0%, rgba(6, 9, 11, 0.30) 40%, rgba(6, 9, 11, 0.62) 100%);
 }
 
 .hero-slide .hero-content {
@@ -313,13 +329,17 @@
   gap: var(--space-md);
 }
 
+/* Shown at every width. The track is overflow-x:hidden, so there is no swipe
+   to fall back on — without these the dots would be the only way off slide one
+   on a phone. 44px is the minimum comfortable tap target, so the size holds
+   on small screens rather than shrinking with the viewport. */
 .hero-arrow {
   width: 44px; height: 44px;
   border-radius: var(--radius-pill);
   background: rgba(255, 255, 255, 0.12);
   border: 1px solid rgba(255, 255, 255, 0.36);
   color: #fff;
-  display: none;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
@@ -434,10 +454,6 @@
   30%  { opacity: 1; }
   70%  { opacity: 1; }
   100% { transform: translateY(100%); opacity: 0; }
-}
-
-@media (min-width: 700px) {
-  .hero-arrow { display: inline-flex; }
 }
 
 /* ---------- About ---------- */
@@ -887,71 +903,189 @@
   }
 }
 
-/* ---------- Team ---------- */
+/* ---------- Team ----------
+   A ten-column bed so the tiles can take unequal widths and still line up.
+   Tim's tile is four columns and spans both rows; the rest sit to his right,
+   three across on the top row and two wider ones beneath. The spans come off
+   :nth-child, so each breakpoint restates the arrangement without the markup
+   knowing anything about it. */
 .team-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: var(--space-lg);
-  max-width: 600px;
+  grid-template-columns: repeat(10, 1fr);
+  gap: var(--space-sm);
+  max-width: 1080px;
   margin-inline: auto;
 }
 
-.team-member { text-align: center; }
-.team-member .pic {
+.team-member {
   position: relative;
+  margin: 0;
+  grid-column: span 2;
+  aspect-ratio: 4 / 5;
   border-radius: var(--radius-lg);
   overflow: hidden;
-  aspect-ratio: 1;
-  margin-bottom: var(--space-sm);
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
   box-shadow: var(--shadow-md);
+  transition: transform var(--dur-base) var(--ease-out),
+              box-shadow var(--dur-base) var(--ease-out),
+              border-color var(--dur-base) var(--ease-out);
 }
+.team-member:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-lg);
+  border-color: var(--ring-accent);
+}
+
+/* The two lower tiles run wider than the three above them. Their extra width
+   is matched by a wider aspect so both rows finish at the same height. */
+.team-member:nth-child(5),
+.team-member:nth-child(6) {
+  grid-column: span 3;
+  aspect-ratio: 6 / 5;
+}
+
+/* aspect-ratio:auto because the row span already fixes the height: whatever
+   the two rows beside it come to, plus the gap. */
+.team-member--lead {
+  grid-column: span 4;
+  grid-row: span 2;
+  aspect-ratio: auto;
+}
+
+.team-member .pic {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+.team-member .pic picture { display: block; height: 100%; }
+.team-member .pic img {
+  width: 100%; height: 100%;
+  object-fit: cover;
+  /* Tim is high in his frame — a centred crop at the square and landscape
+     breakpoints would cut his head off. */
+  object-position: 50% 22%;
+  transition: transform var(--dur-slow) var(--ease-out);
+}
+.team-member:hover .pic img { transform: scale(1.05); }
+
 /* Inset ring rather than a border, so it lands on top of the photo and can
    animate in without shifting the layout by a pixel. */
 .team-member .pic::after {
   content: "";
   position: absolute;
   inset: 0;
-  border-radius: inherit;
   box-shadow: inset 0 0 0 2px transparent;
   transition: box-shadow var(--dur-base) var(--ease-out);
   pointer-events: none;
 }
 .team-member:hover .pic::after { box-shadow: inset 0 0 0 2px var(--color-accent); }
-.team-member .pic img {
-  width: 100%; height: 100%;
-  object-fit: cover;
-  transition: transform var(--dur-slow) var(--ease-out);
-}
-.team-member:hover .pic img { transform: scale(1.06); }
-.team-member h4 { margin-bottom: 2px; }
-.team-member .role {
-  display: block;
-  color: var(--color-text-muted);
-  font-size: var(--fs-sm);
-  margin-bottom: var(--space-xs);
-}
-.team-member .social {
+
+/* --- Placeholder tiles ---
+   For the crew we have no photograph of. A drawn figure on a tinted field is
+   honest about being a placeholder, where a stock face would not be. The
+   angle and highlight shift per tile so four of them in a row don't read as
+   one repeated swatch. */
+.pic--placeholder {
+  --ph-angle: 150deg;
+  --ph-x: 30%;
   display: flex;
+  align-items: center;
   justify-content: center;
-  gap: var(--space-2xs);
+  background-image:
+    radial-gradient(110% 80% at var(--ph-x) 12%, rgba(255, 255, 255, 0.07), transparent 62%),
+    linear-gradient(var(--ph-angle), var(--color-surface-2), var(--color-accent-tint));
 }
-.team-member .social a {
-  width: 34px; height: 34px;
-  border-radius: 50%;
-  background: var(--tint-accent-soft);
-  border: 1px solid var(--ring-accent);
+.team-member:nth-child(3) .pic--placeholder { --ph-angle: 205deg; --ph-x: 72%; }
+.team-member:nth-child(4) .pic--placeholder { --ph-angle: 115deg; --ph-x: 48%; }
+.team-member:nth-child(5) .pic--placeholder { --ph-angle: 250deg; --ph-x: 22%; }
+
+.team-avatar {
+  width: 30%;
+  height: auto;
+  aspect-ratio: 1;
   color: var(--color-accent);
+  opacity: 0.45;
+  /* Lifted off centre so the figure is not buried under the caption */
+  margin-bottom: 12%;
+  transition: opacity var(--dur-base) var(--ease-out);
+}
+.team-member:hover .team-avatar { opacity: 0.62; }
+
+/* --- Caption --- */
+.team-caption {
+  position: absolute;
+  inset: auto 0 0 0;
+  padding: var(--space-md) var(--space-sm) var(--space-sm);
+  background: linear-gradient(180deg, rgba(6, 9, 11, 0) 0%, rgba(6, 9, 11, 0.72) 45%, rgba(6, 9, 11, 0.92) 100%);
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+.team-caption h4 {
+  margin: 0;
+  color: #fff;
+  font-size: var(--fs-base);
+  letter-spacing: -0.01em;
+}
+.team-caption .role {
+  color: rgba(255, 255, 255, 0.82);
+  font-size: var(--fs-sm);
+  line-height: 1.35;
+  text-wrap: pretty;
+}
+.team-member--lead .team-caption {
+  padding: var(--space-xl) var(--space-md) var(--space-md);
+}
+.team-member--lead .team-caption h4 { font-size: var(--fs-xl); }
+.team-member--lead .team-caption .role { font-size: var(--fs-base); }
+
+.team-ig {
+  position: absolute;
+  top: var(--space-sm);
+  right: var(--space-sm);
+  z-index: 2;
+  width: 38px; height: 38px;
+  border-radius: 50%;
   display: flex; align-items: center; justify-content: center;
+  color: #fff;
+  background: rgba(255, 255, 255, 0.14);
+  border: 1px solid rgba(255, 255, 255, 0.38);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
   transition: background var(--dur-fast) var(--ease-out),
-              color var(--dur-fast) var(--ease-out),
               transform var(--dur-fast) var(--ease-out);
 }
-.team-member .social a:hover {
+.team-ig:hover {
   background: var(--color-accent);
   color: var(--color-on-accent);
   transform: translateY(-2px);
 }
-.team-member .social svg { width: 15px; height: 15px; }
+.team-ig svg { width: 16px; height: 16px; }
+
+/* Tablet: Tim goes full width above the others, who keep the 3-over-2 shape.
+   Square rather than portrait so a full-width lead tile doesn't run to a
+   thousand pixels tall. */
+@media (max-width: 980px) {
+  .team-grid { grid-template-columns: repeat(6, 1fr); }
+  .team-member--lead {
+    grid-column: span 6;
+    grid-row: auto;
+    aspect-ratio: 1;
+  }
+}
+
+/* Phone: two up, with the last tile taking the full width so the row never
+   ends on a half-empty cell. */
+@media (max-width: 560px) {
+  .team-grid { grid-template-columns: repeat(2, 1fr); }
+  .team-member { grid-column: span 1; aspect-ratio: 4 / 5; }
+  .team-member:nth-child(5) { grid-column: span 1; aspect-ratio: 4 / 5; }
+  .team-member:nth-child(6) { grid-column: span 2; aspect-ratio: 3 / 2; }
+  .team-member--lead { grid-column: span 2; aspect-ratio: 1; }
+  .team-avatar { width: 34%; }
+}
 
 /* ---------- FAQ ---------- */
 .faq-grid {

@@ -116,6 +116,12 @@
       <symbol id="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
         <path d="M20.5 14.2A8.6 8.6 0 0 1 9.8 3.5a8.6 8.6 0 1 0 10.7 10.7z"/>
       </symbol>
+      <!-- Stands in for a team portrait we don't have yet. Lighter stroke than
+           the UI icons around it because it renders far larger than 24px. -->
+      <symbol id="icon-portrait" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="8.6" r="3.7"/>
+        <path d="M4.6 20.4a7.4 7.4 0 0 1 14.8 0"/>
+      </symbol>
     </defs>
   </svg>
 
@@ -278,8 +284,8 @@
 
       <div class="hero-slide">
         <picture>
-          <source type="image/webp" srcset="assets/test/img/slide/slide-1-960.webp 960w, assets/test/img/slide/slide-1.webp 1920w" sizes="100vw">
-          <img src="assets/img/slide/slide-1.jpg" srcset="assets/test/img/slide/slide-1-960.jpg 960w, assets/img/slide/slide-1.jpg 1920w" sizes="100vw" alt="Tim Beeston Cleaning van driving through the Gap of Dunloe, Killarney" width="1920" height="1080" loading="eager" fetchpriority="high">
+          <source type="image/webp" srcset="assets/test2/img/slide/slide-1-960.webp 960w, assets/test2/img/slide/slide-1.webp 1920w" sizes="100vw">
+          <img src="assets/test2/img/slide/slide-1.jpg" srcset="assets/test2/img/slide/slide-1-960.jpg 960w, assets/test2/img/slide/slide-1.jpg 1920w" sizes="100vw" alt="Tim Beeston Cleaning van parked in front of a large Victorian country house, with a hose run to the front steps" width="1920" height="1080" loading="eager" fetchpriority="high">
         </picture>
         <div class="container">
           <div class="hero-content">
@@ -296,8 +302,8 @@
 
       <div class="hero-slide">
         <picture>
-          <source type="image/webp" srcset="assets/test/img/slide/slide-2-960.webp 960w, assets/test/img/slide/slide-2.webp 1920w" sizes="100vw">
-          <img src="assets/img/slide/slide-2.jpg" srcset="assets/test/img/slide/slide-2-960.jpg 960w, assets/img/slide/slide-2.jpg 1920w" sizes="100vw" alt="Tim Beeston Cleaning van parked on a Kerry beach" width="1920" height="1080" loading="lazy" decoding="async">
+          <source type="image/webp" srcset="assets/test2/img/slide/slide-2-960.webp 960w, assets/test2/img/slide/slide-2.webp 1536w" sizes="100vw">
+          <img src="assets/test2/img/slide/slide-2.jpg" srcset="assets/test2/img/slide/slide-2-960.jpg 960w, assets/test2/img/slide/slide-2.jpg 1536w" sizes="100vw" alt="Tim Beeston Cleaning van in the foreground while a cleaner pole-washes the windows of a multi-storey building" width="1536" height="864" loading="lazy" decoding="async">
         </picture>
         <div class="container">
           <div class="hero-content">
@@ -312,10 +318,12 @@
         </div>
       </div>
 
-      <div class="hero-slide">
+      <!-- --dim: this slide's photograph is a close-up of large white lettering
+           right where the headline sits (see components.css) -->
+      <div class="hero-slide hero-slide--dim">
         <picture>
-          <source type="image/webp" srcset="assets/test/img/slide/slide-3-960.webp 960w, assets/test/img/slide/slide-3.webp 1920w" sizes="100vw">
-          <img src="assets/img/slide/slide-3.jpg" srcset="assets/test/img/slide/slide-3-960.jpg 960w, assets/img/slide/slide-3.jpg 1920w" sizes="100vw" alt="Window cleaner looking out over a lake view through a freshly cleaned window" width="1920" height="1080" loading="lazy" decoding="async">
+          <source type="image/webp" srcset="assets/test2/img/slide/slide-3-960.webp 960w, assets/test2/img/slide/slide-3.webp 1536w" sizes="100vw">
+          <img src="assets/test2/img/slide/slide-3.jpg" srcset="assets/test2/img/slide/slide-3-960.jpg 960w, assets/test2/img/slide/slide-3.jpg 1536w" sizes="100vw" alt="Close-up of the Tim Beeston Cleaning decal on a freshly cleaned window at sunset" width="1536" height="864" loading="lazy" decoding="async">
         </picture>
         <div class="container">
           <div class="hero-content">
@@ -585,39 +593,86 @@
       </div>
       <div class="container">
         <div class="section-title" data-reveal>
-          <span class="eyebrow">Meet The Team</span>
-          <h2>Our Team</h2>
-          <p>This is our ugly mugs!</p>
+          <span class="eyebrow">Who We Are</span>
+          <h2>Team</h2>
+          <p>This is part of our amazing team.</p>
         </div>
 
+        <!-- Tim leads on a tall tile at the left, facing right across the
+             others. DOM order is the reading order and the grid spans are
+             driven off :nth-child, so the arrangement re-flows at each
+             breakpoint without the markup changing. Members we have no
+             photograph for get a drawn placeholder rather than a stock face. -->
         <div class="team-grid">
-          <div class="team-member" data-reveal>
+
+          <figure class="team-member team-member--lead" data-reveal>
             <div class="pic">
               <picture>
-                <source type="image/webp" srcset="assets/test/img/team/team-1.webp">
-                <img src="assets/img/team/team-1.jpg" alt="Tim Beeston" width="600" height="600" loading="lazy" decoding="async">
+                <source type="image/webp" srcset="assets/test2/img/team/tim-520.webp 520w, assets/test2/img/team/tim.webp 900w" sizes="(max-width: 980px) 100vw, 40vw">
+                <img src="assets/test2/img/team/tim.jpg" srcset="assets/test2/img/team/tim-520.jpg 520w, assets/test2/img/team/tim.jpg 900w" sizes="(max-width: 980px) 100vw, 40vw" alt="Tim Beeston sitting with a coffee, looking across the room" width="900" height="1125" loading="lazy" decoding="async">
               </picture>
             </div>
-            <h4>Tim</h4>
-            <span class="role">Chief Dosser &amp; coffee consumer</span>
-            <div class="social">
-              <a href="https://www.instagram.com/timbeestoncleaning/" aria-label="Tim on Instagram"><svg class="icon"><use href="#icon-instagram"></use></svg></a>
-            </div>
-          </div>
+            <a class="team-ig" href="https://www.instagram.com/timbeestoncleaning/" aria-label="Tim on Instagram"><svg class="icon"><use href="#icon-instagram"></use></svg></a>
+            <figcaption class="team-caption">
+              <h4>Tim</h4>
+              <span class="role">Chief dosser &amp; coffee consumer.</span>
+            </figcaption>
+          </figure>
 
-          <div class="team-member" data-reveal>
+          <figure class="team-member" data-reveal>
+            <div class="pic pic--placeholder">
+              <svg class="team-avatar" aria-hidden="true"><use href="#icon-portrait"></use></svg>
+            </div>
+            <figcaption class="team-caption">
+              <h4>Libby</h4>
+              <span class="role">Rare sightings, many think she's in witness protection!</span>
+            </figcaption>
+          </figure>
+
+          <figure class="team-member" data-reveal>
+            <div class="pic pic--placeholder">
+              <svg class="team-avatar" aria-hidden="true"><use href="#icon-portrait"></use></svg>
+            </div>
+            <figcaption class="team-caption">
+              <h4>Andrea</h4>
+              <span class="role">Cleaner with impeccable nails!</span>
+            </figcaption>
+          </figure>
+
+          <figure class="team-member" data-reveal>
+            <div class="pic pic--placeholder">
+              <svg class="team-avatar" aria-hidden="true"><use href="#icon-portrait"></use></svg>
+            </div>
+            <figcaption class="team-caption">
+              <h4>Molly</h4>
+              <span class="role">Full of smiles &amp; chat.</span>
+            </figcaption>
+          </figure>
+
+          <figure class="team-member" data-reveal>
+            <div class="pic pic--placeholder">
+              <svg class="team-avatar" aria-hidden="true"><use href="#icon-portrait"></use></svg>
+            </div>
+            <figcaption class="team-caption">
+              <h4>Denys</h4>
+              <span class="role">The muscle and the real worker.</span>
+            </figcaption>
+          </figure>
+
+          <figure class="team-member" data-reveal>
             <div class="pic">
               <picture>
                 <source type="image/webp" srcset="assets/test/img/team/team-2.webp">
                 <img src="assets/img/team/team-2.jpg" alt="Daragh Beeston" width="600" height="600" loading="lazy" decoding="async">
               </picture>
             </div>
-            <h4>Daragh</h4>
-            <span class="role">The actual worker</span>
-            <div class="social">
-              <a href="https://www.instagram.com/daraghbphotography/" aria-label="Daragh on Instagram"><svg class="icon"><use href="#icon-instagram"></use></svg></a>
-            </div>
-          </div>
+            <a class="team-ig" href="https://www.instagram.com/daraghbphotography/" aria-label="Daragh on Instagram"><svg class="icon"><use href="#icon-instagram"></use></svg></a>
+            <figcaption class="team-caption">
+              <h4>Daragh</h4>
+              <span class="role">The heir, he helps the old man sometimes!</span>
+            </figcaption>
+          </figure>
+
         </div>
       </div>
     </section>
