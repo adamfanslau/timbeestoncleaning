@@ -990,6 +990,12 @@
 }
 .team-member:hover .pic img { transform: scale(1.05); }
 
+/* Denys's frame carries a lot of sky above him, and his is one of the two wide
+   tiles — at the shared 22% the landscape crop spends its top third on cloud.
+   Only the landscape crop is affected: at the phone breakpoint his tile is
+   portrait, the square source fills it top to bottom, and this has no effect. */
+.team-member:nth-child(5) .pic img { object-position: 50% 58%; }
+
 /* Inset ring rather than a border, so it lands on top of the photo and can
    animate in without shifting the layout by a pixel. */
 .team-member .pic::after {
@@ -1005,8 +1011,8 @@
 /* --- Placeholder tiles ---
    For the crew we have no photograph of. A drawn figure on a tinted field is
    honest about being a placeholder, where a stock face would not be. The
-   angle and highlight shift per tile so four of them in a row don't read as
-   one repeated swatch. */
+   angle and highlight shift per tile so the three of them in a row don't read
+   as one repeated swatch. */
 .pic--placeholder {
   --ph-angle: 150deg;
   --ph-x: 30%;
@@ -1019,7 +1025,6 @@
 }
 .team-member:nth-child(3) .pic--placeholder { --ph-angle: 205deg; --ph-x: 72%; }
 .team-member:nth-child(4) .pic--placeholder { --ph-angle: 115deg; --ph-x: 48%; }
-.team-member:nth-child(5) .pic--placeholder { --ph-angle: 250deg; --ph-x: 22%; }
 
 .team-avatar {
   width: 30%;
@@ -1119,15 +1124,30 @@
 /* Phone: two up, with the last tile taking the full width so the row never
    ends on a half-empty cell. */
 @media (max-width: 560px) {
-  /* Two lines, not three: the type shrinks faster than the tiles do here, so
-     the longest role still lands on two lines at 320px. */
-  .team-grid { grid-template-columns: repeat(2, 1fr); --role-lines: 2; }
+  /* Still three: the tiles halve in width here but the type barely shrinks, so
+     the longest role runs to three lines right across the phone range. */
+  .team-grid { grid-template-columns: repeat(2, 1fr); }
   .team-member { grid-column: span 1; aspect-ratio: 4 / 5; }
   .team-member:nth-child(5) { grid-column: span 1; aspect-ratio: 4 / 5; }
   .team-member:nth-child(6) { grid-column: span 2; aspect-ratio: 3 / 2; }
   .team-member--lead { grid-column: span 2; aspect-ratio: 1; }
   .team-avatar { width: 34%; }
   .team-avatar--portrait { width: 50%; }
+}
+
+/* Narrow phones: two up stops working here. The tiles are down to ~150px, the
+   longest role takes a fourth line, and the caption ends up swallowing three
+   quarters of the tile. One column gives the copy its width back — and with a
+   single tile per row there is nothing to line up, so the reserve goes away
+   and each caption is only as deep as its own text. */
+@media (max-width: 380px) {
+  .team-grid { grid-template-columns: 1fr; --role-lines: 1; }
+  .team-member,
+  .team-member:nth-child(5) { grid-column: span 1; aspect-ratio: 1; }
+  .team-member:nth-child(6) { grid-column: span 1; }
+  .team-member--lead { grid-column: span 1; }
+  .team-avatar { width: 26%; }
+  .team-avatar--portrait { width: 38%; }
 }
 
 /* ---------- FAQ ---------- */
