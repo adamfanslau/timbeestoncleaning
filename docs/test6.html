@@ -124,6 +124,18 @@
         <circle cx="12" cy="8.6" r="3.7"/>
         <path d="M4.6 20.4a7.4 7.4 0 0 1 14.8 0"/>
       </symbol>
+      <!-- Window squeegee, drawn rotated 90° from how it hangs on a wall so
+           it wipes horizontally: rubber working edge on the left, blade
+           channel, tapered ferrule, handle trailing right — the tool reads
+           as being pulled across the glass. Used by the logo reveal
+           (.logo-squeegee, layout.css). Token fills resolve through the
+           <use> shadow tree, same as the deco sprite. -->
+      <symbol id="icon-squeegee" viewBox="0 0 60 64" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="5.5" y="4" width="3" height="56" rx="1.5" fill="currentColor" stroke="none"/>
+        <rect x="9" y="1.5" width="9.5" height="61" rx="3.5" fill="var(--deco-glass)" fill-opacity="0.25"/>
+        <path d="M18.5 21.5 L31 26.5 L31 37.5 L18.5 42.5 Z" fill="var(--deco-glass)" fill-opacity="0.18"/>
+        <rect x="31" y="26.5" width="25" height="11" rx="5.5" fill="var(--color-accent)"/>
+      </symbol>
       <!-- Libby, traced from her photograph. Filled line art rather than the
            stroked pictograms above — hence fill-rule="evenodd" and no stroke —
            and the viewBox is cropped to the ink so the portrait fills its tile
@@ -264,7 +276,7 @@
   <header id="header">
     <div class="container header-inner">
       <div class="logo">
-        <a href="#hero"><img src="assets/img/logo.png" alt="Tim Beeston Cleaning"></a>
+        <a href="#hero"><img src="assets/img/logo.png" alt="Tim Beeston Cleaning"><svg class="logo-squeegee" aria-hidden="true" focusable="false"><use href="#icon-squeegee"></use></svg><svg class="logo-sparkle" aria-hidden="true" focusable="false"><use href="#deco-sparkle"></use></svg></a>
       </div>
 
       <div class="nav-backdrop"></div>

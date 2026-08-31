@@ -232,6 +232,105 @@
 
 :root[data-theme="light"] #header .logo img { filter: none; }
 
+/* --- Logo squeegee reveal ---
+   One slow pass on load: the wordmark is uncovered left to right behind a
+   drawn window squeegee (#icon-squeegee in the sprite), and the pass lands
+   on a double light-flash with a four-point sparkle — squeaky clean. Pure
+   CSS and self-terminating: the wipe ends fully revealed and fills
+   backwards only, so the logo can never be left hidden (it plays and
+   completes even with scripting disabled; under reduced motion none of it
+   exists and every prop is invisible at rest). The tool animates `left` in
+   % on the same curve as the clip, so its rubber edge stays glued to the
+   reveal line at any logo width — a one-shot pass on a 50px box is
+   negligible paint. */
+#header .logo a {
+  position: relative;
+  display: inline-block;
+}
+
+/* Real elements rather than pseudos so the tool drawing can take theme
+   tokens through the sprite. Invisible at rest — only the animations below
+   ever show them. */
+.logo-squeegee,
+.logo-sparkle {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+.logo-squeegee {
+  top: 50%;
+  left: 0;
+  width: 50px;
+  height: 54px;
+  margin-top: -27px;
+  z-index: 2;
+  color: var(--color-accent-strong);
+  filter: drop-shadow(0 0 6px var(--ring-accent));
+  rotate: 3deg;   /* hand-held, not mechanical */
+}
+.logo-sparkle {
+  top: -11px;
+  right: -13px;
+  width: 20px;
+  height: 20px;
+  z-index: 3;
+}
+
+/* Flash plate for the double pulse as the pass completes. White core with
+   an accent halo so it registers on the dark and light header alike. */
+#header .logo a::before {
+  content: "";
+  position: absolute;
+  inset: -10px;
+  z-index: 1;
+  background: radial-gradient(closest-side at 60% 50%,
+    rgba(255, 255, 255, 0.9), rgba(126, 208, 222, 0.35) 45%, transparent 78%);
+  opacity: 0;
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  #header .logo img {
+    animation: logo-wipe 1700ms var(--ease-out) 500ms backwards;
+  }
+  .logo-squeegee {
+    animation: logo-squeegee-sweep 1700ms var(--ease-out) 500ms both;
+  }
+  /* 2200ms = wipe delay + duration: the flash fires as the tool exits */
+  #header .logo a::before {
+    animation: logo-flash 900ms var(--ease-out) 2200ms both;
+  }
+  .logo-sparkle {
+    animation: logo-sparkle-pop 900ms var(--ease-out) 2200ms both;
+  }
+}
+@keyframes logo-wipe {
+  from { clip-path: inset(-6px 100% -6px 0); }
+  to   { clip-path: inset(-6px -6px -6px 0); }
+}
+/* -6px ≈ the rubber edge's offset inside the 50px-wide tool drawing */
+@keyframes logo-squeegee-sweep {
+  0%   { left: calc(-2% - 6px); opacity: 0; }
+  6%   { opacity: 1; }
+  94%  { opacity: 1; }
+  100% { left: calc(101% - 6px); opacity: 0; }
+}
+/* Double pulse, second flash the brighter one */
+@keyframes logo-flash {
+  0%   { opacity: 0; }
+  14%  { opacity: 0.85; }
+  34%  { opacity: 0.05; }
+  52%  { opacity: 1; }
+  100% { opacity: 0; }
+}
+@keyframes logo-sparkle-pop {
+  0%   { opacity: 0; scale: 0.2; }
+  14%  { opacity: 1; scale: 1; }
+  34%  { opacity: 0.1; scale: 0.4; }
+  52%  { opacity: 1; scale: 1.2; }
+  100% { opacity: 0; scale: 0.3; }
+}
+
 .nav-menu ul {
   /* Positioning context for the sliding .nav-indicator */
   position: relative;

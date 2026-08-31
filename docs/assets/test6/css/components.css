@@ -1168,7 +1168,9 @@ html.theme-wipe .hero-badge::after {
    Ditto the droplet overlay — a dozen live backdrop-filters have no place
    inside a view-transition snapshot. */
 .theme-wipe body::after { display: none; }
-.theme-wipe .droplets { display: none; }
+/* visibility, not display: display:none would reset the droplets' one-shot
+   intro animations, replaying the whole rain sequence after the wipe. */
+.theme-wipe .droplets { visibility: hidden; }
 
 /* ---------- Team ----------
    A ten-column bed so the tiles can take unequal widths and still line up.
@@ -1835,9 +1837,9 @@ html.theme-wipe .hero-badge::after {
 
 .droplet {
   position: absolute;
-  /* left/top/width/height come inline from initDroplets(); left/top address
-     the drop's CENTRE so the layout table thinks in anchor points. */
-  translate: -50% -50%;
+  /* left/top/width/height come inline from initDroplets(), already offset
+     to the drop's centre — the `translate` property is NOT used for
+     centring because the run-off animation below owns it. */
   /* Per-theme filter list: dark lifts the backdrop a touch, light darkens
      it — on near-white the drop's body must separate from the page before
      any white highlight can register. Brightness stays within ±4%; more
@@ -1904,10 +1906,33 @@ html.theme-wipe .hero-badge::after {
   .droplet::after {
     animation: drop-glint var(--glint-dur, 7s) var(--ease-soft) infinite var(--glint-delay, 0s);
   }
+
+  /* One-shot lifecycle: each drop condenses in on its stagger slot, sits a
+     moment, then runs down the glass — gravity easing, a slight downward
+     stretch, drifting a few px sideways and drying up as it goes. The
+     per-drop numbers (--in-delay, --slide-dur, --slide-delay, --run-x,
+     --run-y) come inline from initDroplets(), which removes the whole
+     overlay once the last drop has gone. Under reduced motion
+     initDroplets() builds nothing at all. */
+  .droplet {
+    animation:
+      drop-in 600ms var(--ease-back) var(--in-delay, 0s) backwards,
+      drop-slide var(--slide-dur, 1.6s) cubic-bezier(0.5, 0, 0.75, 0.6) var(--slide-delay, 3s) forwards;
+  }
 }
 @keyframes drop-glint {
   0%, 100% { opacity: 0.45; transform: translate(0, 0) scale(1); }
   50%      { opacity: 0.95; transform: translate(18%, 10%) scale(1.18); }
+}
+@keyframes drop-in {
+  from { opacity: 0; scale: 0.55; }
+}
+@keyframes drop-slide {
+  to {
+    translate: var(--run-x, 0px) var(--run-y, 160px);
+    scale: 0.92 1.28;
+    opacity: 0;
+  }
 }
 
 /* Lives here, after the reveal transition rule, so the cascade cannot

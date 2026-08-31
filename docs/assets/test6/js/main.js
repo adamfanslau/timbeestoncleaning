@@ -1018,6 +1018,10 @@
    * sampling produces the refraction as content scrolls beneath.
    */
   function initDroplets() {
+    // The rain is now a one-shot load intro (condense in, sit, run off) —
+    // pure motion, so reduced-motion visitors get none rather than a
+    // permanent overlay that never leaves.
+    if (prefersReducedMotion) return;
     var container = document.querySelector("#topbar .container");
     if (!container) return;
 
@@ -1059,8 +1063,6 @@
     // The rotated silhouettes' bounding boxes run ~25% past their width, so
     // a drop "fits" the gutter only when cx ± size × FIT/2 stays inside it.
     var FIT = 1.25;
-
-    var overlay = null;
 
     function build() {
       var rect = container.getBoundingClientRect();
@@ -1120,30 +1122,43 @@
         .sort(function (a, b) { return b.size - a.size; })
         .forEach(function (d, rank) { d.tiny = rank >= budget || d.size < 18; });
 
+      var lastGone = 0;   // seconds until the final drop has run off
+
       drops.forEach(function (d) {
         var el = document.createElement("span");
         el.className = "droplet droplet--" + d.v + (d.tiny ? " droplet--tiny" : "");
-        el.style.left = d.x.toFixed(1) + "px";
-        el.style.top = d.y.toFixed(1) + "vh";
+        // Centre offsets are baked into left/top — the `translate` property
+        // belongs to the run-off animation (see drop-slide, components.css).
+        el.style.left = (d.x - d.size / 2).toFixed(1) + "px";
+        el.style.top = "calc(" + d.y.toFixed(1) + "vh - " + (d.size * 0.53).toFixed(1) + "px)";
         el.style.width = d.size.toFixed(1) + "px";
         // A resting drop sags a little — never a perfect circle.
         el.style.height = (d.size * 1.06).toFixed(1) + "px";
         el.style.setProperty("--glint-dur", (5 + Math.random() * 4).toFixed(1) + "s");
         // Negative delay starts each glint mid-cycle instead of in unison.
         el.style.setProperty("--glint-delay", (-Math.random() * 9).toFixed(1) + "s");
+
+        // Lifecycle: staggered condense-in, then a run down the glass at
+        // its own moment. Bigger drops run farther before drying up.
+        var slideDelay = 2.2 + Math.random() * 2.3;
+        var slideDur = 1.2 + Math.random();
+        el.style.setProperty("--in-delay", (Math.random() * 0.9).toFixed(2) + "s");
+        el.style.setProperty("--slide-delay", slideDelay.toFixed(2) + "s");
+        el.style.setProperty("--slide-dur", slideDur.toFixed(2) + "s");
+        el.style.setProperty("--run-x", (Math.random() * 20 - 10).toFixed(0) + "px");
+        el.style.setProperty("--run-y", (30 + d.size * (2 + Math.random() * 1.5)).toFixed(0) + "px");
+        if (slideDelay + slideDur > lastGone) lastGone = slideDelay + slideDur;
+
         next.appendChild(el);
       });
 
-      if (overlay) overlay.remove();
-      overlay = next;
-      document.body.appendChild(overlay);
-    }
+      document.body.appendChild(next);
 
-    var resizeTimer;
-    window.addEventListener("resize", function () {
-      clearTimeout(resizeTimer);
-      resizeTimer = setTimeout(build, 200);
-    });
+      // Every drop holds opacity 0 (animation-fill forwards) once it has run
+      // off — drop the whole overlay when the show is over, and the last of
+      // the backdrop-filter cost goes with it.
+      window.setTimeout(function () { next.remove(); }, (lastGone + 0.5) * 1000);
+    }
 
     build();
   }
