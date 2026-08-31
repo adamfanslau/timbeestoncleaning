@@ -1,0 +1,600 @@
+/* ==========================================================================
+   Layout — top bar, header/nav, section rhythm, footer, back-to-top
+   ========================================================================== */
+
+/* ---------- Top bar ---------- */
+#topbar {
+  position: relative;
+  background: var(--color-bg-alt);
+  border-bottom: 1px solid var(--color-border);
+  font-size: var(--fs-sm);
+  color: var(--color-text-muted);
+  /* Fixed height — the hero subtracts --topbar-h to end exactly at the fold */
+  height: var(--topbar-h);
+}
+
+/* Hairline of brand color along the very top edge of the page */
+#topbar::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 2px;
+  background: var(--grad-accent);
+  opacity: 0.85;
+}
+
+#topbar .container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-md);
+  height: 100%;
+}
+
+#topbar .contact-info {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+}
+
+#topbar .contact-info a,
+#topbar .contact-info span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--color-text-muted);
+}
+#topbar .contact-info a:hover { color: var(--color-accent); }
+#topbar .contact-info svg { width: 15px; height: 15px; color: var(--color-accent); flex-shrink: 0; }
+/* The WhatsApp mark is filled, so it reads a shade heavier than the line icons
+   beside it at the same box size — trim it back to match. */
+#topbar .contact-whatsapp svg { width: 14px; height: 14px; color: #25D366; }
+
+#topbar .topbar-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+/* Theme switch — a pill that slides a knob between sun and moon.
+   It is a real <button> with aria-pressed, so it is keyboard and SR usable.
+
+   The geometry is derived, not guessed, so the knob lands concentric with
+   whichever icon it covers. With border-box sizing the padding box is
+   (--switch-w − 2 × border) wide; the knob starts --switch-gap in and
+   travels the remainder, and space-between drops each icon's centre on a
+   knob centre. Change one variable and the rest stays aligned. */
+.theme-toggle {
+  --switch-w: 58px;
+  --switch-h: 28px;
+  --switch-gap: 2px;   /* knob inset from the pill's padding box */
+  --switch-knob: 22px;
+  --switch-icon: 14px;
+  /* Padding box width (−2px for the borders) − knob − a gap at each end */
+  --switch-travel: calc(var(--switch-w) - 2px - var(--switch-knob) - 2 * var(--switch-gap));
+  /* Puts each icon's centre on a knob centre, given justify-content:space-between */
+  --switch-pad: calc(var(--switch-gap) + (var(--switch-knob) - var(--switch-icon)) / 2);
+
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: space-between;
+  width: var(--switch-w);
+  height: var(--switch-h);
+  padding: 0 var(--switch-pad);
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: border-color var(--dur-fast) var(--ease-out),
+              background var(--dur-fast) var(--ease-out),
+              box-shadow var(--dur-fast) var(--ease-out);
+}
+.theme-toggle:hover {
+  border-color: var(--color-accent);
+  box-shadow: var(--glow-accent);
+}
+
+.theme-toggle svg {
+  width: var(--switch-icon);
+  height: var(--switch-icon);
+  position: relative;
+  z-index: 1;
+  transition: color var(--dur-base) var(--ease-out),
+              opacity var(--dur-base) var(--ease-out);
+}
+.theme-toggle .icon-sun { color: var(--color-text-muted); opacity: 0.55; }
+.theme-toggle .icon-moon { color: var(--color-accent); opacity: 1; }
+
+:root[data-theme="light"] .theme-toggle .icon-sun { color: var(--color-accent); opacity: 1; }
+:root[data-theme="light"] .theme-toggle .icon-moon { color: var(--color-text-muted); opacity: 0.55; }
+
+/* The sliding knob sits behind the icons */
+.theme-toggle::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: var(--switch-gap);
+  width: var(--switch-knob);
+  height: var(--switch-knob);
+  margin-top: calc(var(--switch-knob) / -2);
+  border-radius: 50%;
+  background: var(--color-accent-tint);
+  border: 1px solid var(--color-accent);
+  transform: translateX(var(--switch-travel));
+  transition: transform var(--dur-base) var(--ease-back);
+}
+:root[data-theme="light"] .theme-toggle::after { transform: translateX(0); }
+
+@media (prefers-reduced-motion: reduce) {
+  .theme-toggle::after { transition: none; }
+}
+
+#topbar .social-links {
+  display: flex;
+  gap: var(--space-xs);
+}
+#topbar .social-links a {
+  color: var(--color-text-muted);
+  display: inline-flex;
+}
+#topbar .social-links a:hover { color: var(--color-accent); }
+#topbar .social-links svg { width: 16px; height: 16px; }
+
+/* Mobile: the bar goes icon-only. The labels are clipped rather than
+   display:none so screen readers still announce the address and number,
+   and the roomier gap keeps the targets tappable. The Instagram link stays
+   visible at every width — phones are exactly where it hands off to the app. */
+@media (max-width: 720px) {
+  #topbar .social-links svg { width: 18px; height: 18px; }
+
+  #topbar .contact-info { gap: var(--space-lg); }
+  #topbar .contact-info .label {
+    position: absolute;
+    width: 1px; height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+  }
+  #topbar .contact-info svg { width: 18px; height: 18px; }
+  #topbar .contact-whatsapp svg { width: 17px; height: 17px; }
+}
+
+/* ---------- Header ---------- */
+#header {
+  position: sticky;
+  top: 0;
+  z-index: 60;
+  height: var(--header-h);
+  display: flex;
+  align-items: center;
+  background: transparent;
+}
+
+/* The frosted plate lives on a pseudo-element and NEVER on #header itself:
+   backdrop-filter makes an element a containing block for position:fixed
+   descendants, which would shrink the mobile nav drawer and its backdrop
+   from the viewport down to this 76px-tall box the moment the header
+   picked up .is-scrolled. Fading opacity also animates cleanly, which
+   backdrop-filter does not. */
+#header::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: var(--color-header-bg);
+  backdrop-filter: blur(16px) saturate(140%);
+  -webkit-backdrop-filter: blur(16px) saturate(140%);
+  box-shadow: var(--shadow-sm), inset 0 -1px 0 var(--color-border);
+  opacity: 0;
+  transition: opacity var(--dur-base) var(--ease-out);
+}
+
+#header.is-scrolled::before { opacity: 1; }
+
+/* Reading progress along the header's bottom edge. --scroll-progress is
+   written by initScrollProgress(); scaleX is compositor-only, so this costs
+   nothing per frame. */
+#header::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 2px;
+  background: var(--grad-accent);
+  transform: scaleX(var(--scroll-progress));
+  transform-origin: 0 50%;
+  opacity: 0;
+  transition: opacity var(--dur-base) var(--ease-out);
+}
+#header.is-scrolled::after { opacity: 1; }
+
+#header .header-inner {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-md);
+}
+
+/* The wordmark is solid black artwork, so it is inverted for the default dark
+   theme and returned to its natural black in light mode. */
+#header .logo img {
+  height: 42px;
+  width: auto;
+  display: block;
+  filter: invert(1) drop-shadow(0 2px 8px rgba(0, 0, 0, 0.5));
+  transition: transform var(--dur-base) var(--ease-out);
+}
+#header .logo a:hover img { transform: scale(1.03); }
+
+:root[data-theme="light"] #header .logo img { filter: none; }
+
+.nav-menu ul {
+  /* Positioning context for the sliding .nav-indicator */
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+}
+
+.nav-menu a {
+  color: var(--color-text);
+  font-family: var(--font-display);
+  font-stretch: var(--wdth-display);
+  font-weight: 600;
+  font-size: var(--fs-sm);
+  letter-spacing: 0.01em;
+  padding: var(--space-2xs) var(--space-xs);
+  border-radius: var(--radius-pill);
+  position: relative;
+  transition: color var(--dur-fast) var(--ease-out),
+              background var(--dur-fast) var(--ease-out);
+}
+
+/* The underline now grows from the centre out and carries the gradient —
+   same idea as before, read at a glance as deliberate rather than default. */
+.nav-menu a::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: 2px;
+  width: 0;
+  height: 2px;
+  border-radius: 2px;
+  background: var(--grad-accent);
+  transform: translateX(-50%);
+  transition: width var(--dur-base) var(--ease-out);
+}
+
+.nav-menu a:hover,
+.nav-menu a.active { color: var(--color-accent); }
+.nav-menu a:hover { background: var(--color-accent-tint); }
+.nav-menu a:hover::after,
+.nav-menu a.active::after { width: calc(100% - 2 * var(--space-xs)); }
+
+/* --- Sliding active indicator ---
+   One shared bar that glides between links as the active section changes,
+   replacing the per-link underline on desktop (the drawer keeps the old
+   style — see the 900px block below). Created by initNav(), which writes
+   --ind-x/--ind-s; a fixed 80px basis scaled with scaleX keeps every move
+   compositor-only, and a 2px gradient bar tolerates the scaling distortion.
+   .is-settled arrives after the first placement so the bar never glides in
+   from x=0 on load. */
+.nav-indicator {
+  position: absolute;
+  bottom: 2px;
+  left: 0;
+  width: 80px;
+  height: 2px;
+  border-radius: 2px;
+  background: var(--grad-accent);
+  pointer-events: none;
+  transform: translateX(var(--ind-x, 0px)) scaleX(var(--ind-s, 0));
+  transform-origin: 0 50%;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .nav-menu.is-settled .nav-indicator { transition: transform 380ms var(--ease-out); }
+}
+.nav-menu.has-indicator a::after { display: none; }
+
+.nav-toggle {
+  display: none;
+  background: none;
+  border: none;
+  padding: var(--space-2xs);
+  cursor: pointer;
+  color: var(--color-text);
+}
+.nav-toggle svg { width: 26px; height: 26px; }
+
+/* One button, two glyphs — the open state shows the close icon */
+.nav-toggle .icon-close { display: none; }
+.nav-toggle[aria-expanded="true"] .icon-open { display: none; }
+.nav-toggle[aria-expanded="true"] .icon-close { display: block; }
+
+@media (max-width: 900px) {
+  .nav-toggle {
+    display: inline-flex;
+    /* Above the drawer, so the same button also closes it. Only works
+       because .nav-open lifts #header's own z-index past the drawer. */
+    position: relative;
+    z-index: 75;
+  }
+
+  .nav-menu {
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    right: 0;
+    left: auto;
+    width: min(320px, 82vw);
+    z-index: 70;
+    background: var(--color-surface);
+    border-left: 1px solid var(--color-border);
+    box-shadow: var(--shadow-lg);
+    transform: translateX(100%);
+    transition: transform var(--dur-base) var(--ease-out);
+    padding: calc(var(--header-h) + var(--space-lg)) var(--space-lg) var(--space-lg);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+  .nav-menu.is-open { transform: translateX(0); }
+
+  .nav-menu ul {
+    flex-direction: column;
+    align-items: stretch;
+    gap: var(--space-2xs);
+  }
+
+  .nav-menu a {
+    font-size: var(--fs-lg);
+    display: block;
+    padding: var(--space-2xs) var(--space-sm);
+  }
+  .nav-menu a::after { left: var(--space-sm); transform: none; }
+  .nav-menu a:hover::after,
+  .nav-menu a.active::after { width: 28px; }
+
+  /* The drawer keeps the per-link underline; the sliding bar is desktop-only
+     (its geometry is meaningless in a vertical list). */
+  .nav-indicator { display: none; }
+  .nav-menu.has-indicator a::after { display: block; }
+
+  .nav-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 65;
+    background: var(--color-overlay);
+    backdrop-filter: blur(3px);
+    -webkit-backdrop-filter: blur(3px);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity var(--dur-base) var(--ease-out);
+  }
+  .nav-backdrop.is-open {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  /* #header is a stacking context at z-index 60, so the drawer inside it
+     can only outrank page chrome if the header itself is lifted first. */
+  body.nav-open { overflow: hidden; }
+  body.nav-open #header { z-index: 80; }
+  body.nav-open .back-to-top {
+    opacity: 0;
+    pointer-events: none;
+  }
+}
+
+/* ---------- Section rhythm ---------- */
+/* Scoped to content sections so #topbar / #hero keep their own sizing.
+   overflow:hidden clips the decorative artwork that deliberately bleeds past
+   the section edges, so it can never widen the document. Note this makes each
+   section a scroll container — anything that needs to escape one (a sticky
+   sidebar, a popover) would be silently clipped. */
+main > section {
+  padding-block: var(--section-pad);
+  position: relative;
+  overflow: hidden;
+}
+
+/* Keep content above the decorative layers */
+main > section > .container {
+  position: relative;
+  z-index: 1;
+}
+
+section[id] { scroll-margin-top: var(--header-h); }
+
+/* "Home" (nav, logo, footer) targets #hero. Its margin also reserves the
+   topbar's height, which lands the scroll at exactly y = 0 — so going Home
+   brings the contact strip back into view instead of stopping 42px short. */
+#hero { scroll-margin-top: calc(var(--header-h) + var(--topbar-h)); }
+
+.section-bg { background: var(--color-bg-alt); }
+
+/* Soften the hard edge where a tinted band meets the page background, and
+   mark it with a hairline that catches the accent at its centre. */
+.section-bg::before,
+.section-bg::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 64px;
+  pointer-events: none;
+  z-index: 0;
+}
+.section-bg::before {
+  top: 0;
+  background:
+    var(--grad-accent-fade) top / 100% 1px no-repeat,
+    linear-gradient(to bottom, var(--color-bg), transparent);
+  opacity: 0.9;
+}
+.section-bg::after {
+  bottom: 0;
+  background:
+    var(--grad-accent-fade) bottom / 100% 1px no-repeat,
+    linear-gradient(to top, var(--color-bg), transparent);
+  opacity: 0.9;
+}
+
+/* ---------- Footer ---------- */
+#footer {
+  position: relative;
+  background: var(--color-footer-bg);
+  color: var(--color-footer-text);
+  /* Clips the .deco--footer water-line, which bleeds past both side edges */
+  overflow: hidden;
+}
+#footer::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 1px;
+  background: var(--grad-accent-fade);
+}
+
+#footer .footer-top {
+  padding-block: var(--space-xl);
+  border-bottom: 1px solid var(--color-footer-rule);
+}
+
+/* The 4th column now holds the follow card rather than a feed widget. Its
+   handle is one unbreakable token, so that track gets the same weight as the
+   address column — at the narrow end of this 4-col band (just past 900px) a
+   1.2fr track left it a few pixels short. The two link lists wrap freely and
+   are unaffected by the reweighting. */
+#footer .footer-grid {
+  display: grid;
+  grid-template-columns: 1.4fr 1fr 1fr 1.4fr;
+  gap: var(--space-lg);
+}
+
+@media (max-width: 900px) {
+  #footer .footer-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+@media (max-width: 560px) {
+  #footer .footer-grid { grid-template-columns: 1fr; }
+}
+
+#footer h3, #footer h4 {
+  color: var(--color-footer-text);
+}
+
+#footer .footer-info h3 {
+  font-size: var(--fs-xl);
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+
+#footer h4 {
+  font-size: var(--fs-base);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  margin-bottom: var(--space-sm);
+  padding-bottom: var(--space-2xs);
+  border-bottom: 1px solid var(--color-footer-rule);
+}
+
+#footer p, #footer li { color: var(--color-footer-muted); }
+
+#footer .footer-links li {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-bottom: var(--space-2xs);
+}
+#footer .footer-links li > svg {
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
+  color: var(--color-accent);
+  transition: transform var(--dur-fast) var(--ease-out);
+}
+#footer .footer-links li:hover > svg { transform: translateX(3px); }
+#footer .footer-links a {
+  color: var(--color-footer-muted);
+}
+#footer .footer-links a:hover { color: var(--color-footer-accent); }
+
+#footer .social-links {
+  display: flex;
+  gap: var(--space-xs);
+  margin-top: var(--space-sm);
+}
+#footer .social-links a {
+  display: inline-flex;
+  width: 38px; height: 38px;
+  align-items: center; justify-content: center;
+  border-radius: var(--radius-pill);
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: var(--color-footer-text);
+  transition: background var(--dur-fast) var(--ease-out),
+              transform var(--dur-fast) var(--ease-out),
+              box-shadow var(--dur-fast) var(--ease-out);
+}
+#footer .social-links a:hover {
+  background: var(--color-accent);
+  transform: translateY(-2px);
+  box-shadow: var(--glow-accent);
+}
+#footer .social-links svg { width: 16px; height: 16px; }
+
+#footer .footer-bottom {
+  padding-block: var(--space-sm);
+  text-align: center;
+  font-size: var(--fs-sm);
+  color: var(--color-footer-muted);
+}
+
+/* ---------- Back to top ----------
+   The ring is the document's reading progress; the disc inside it is the
+   button proper. One element, two jobs, no extra markup. */
+.back-to-top {
+  position: fixed;
+  right: var(--space-md);
+  bottom: var(--space-md);
+  z-index: 80;
+  width: 50px;
+  height: 50px;
+  padding: 3px;
+  border-radius: var(--radius-pill);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background:
+    conic-gradient(from -90deg,
+      var(--color-accent-2) calc(var(--scroll-progress) * 360deg),
+      rgba(255, 255, 255, 0.16) 0);
+  color: #fff;
+  box-shadow: var(--shadow-md);
+  opacity: 0;
+  transform: translateY(12px);
+  pointer-events: none;
+  transition: opacity var(--dur-base) var(--ease-out),
+              transform var(--dur-base) var(--ease-out);
+}
+.back-to-top::before {
+  content: "";
+  position: absolute;
+  inset: 3px;
+  border-radius: 50%;
+  background: var(--color-accent);
+  transition: background var(--dur-fast) var(--ease-out);
+}
+.back-to-top.is-visible {
+  opacity: 1;
+  transform: none;
+  pointer-events: auto;
+}
+.back-to-top:hover { transform: translateY(-3px); }
+.back-to-top:hover::before { background: var(--color-accent-strong); }
+.back-to-top svg { width: 20px; height: 20px; position: relative; }
