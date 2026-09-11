@@ -1,0 +1,1963 @@
+/* ==========================================================================
+   Components — buttons, hero, cards, gallery, lightbox, faq
+   ========================================================================== */
+
+/* ---------- Reveal transition ---------- */
+/* --reveal-i is set per element by initScrollReveal(), indexed within the
+   batch that entered the viewport together, which is what produces the
+   cascade. Opacity finishes early so the fade reads crisp while the
+   transform is still settling out of its overshoot. Reveals replay every
+   time an element scrolls back into view (the JS drops .is-visible once it
+   has fully left), so the same transition runs again on each re-entry. */
+.js [data-reveal] {
+  --reveal-delay: calc(var(--reveal-i, 0) * var(--reveal-step));
+  transition: opacity var(--reveal-fade) var(--ease-out) var(--reveal-delay),
+              transform var(--reveal-dur) var(--ease-back) var(--reveal-delay);
+}
+
+/* The squeegee variant moves the reveal onto clip-path. Paint-driven rather
+   than compositor-only — acceptable as a 650ms pass over card-sized boxes
+   per reveal, never continuous. The end-of-file reduce block still kills it. */
+.js [data-reveal="clip"] {
+  transition: opacity var(--reveal-fade) var(--ease-out) var(--reveal-delay),
+              clip-path 650ms var(--ease-out) var(--reveal-delay);
+}
+
+/* Un-reveal is a snap, never a fade. initScrollReveal() drops .is-visible
+   only once an element is fully off screen, so the reset must not be seen —
+   and a transition is read from the state being ENTERED, so this one rule
+   covers every variant: (0,3,0) beats the (0,2,0) rules above, including
+   the clip variant. Under reduced motion the end-of-file rule already
+   disables transitions in both directions. */
+.js [data-reveal]:not(.is-visible) { transition: none; }
+
+/* Heading line + underline ride the same --reveal-delay as their section
+   title, then land in sequence: line first, rule drawing in behind it.
+   Hidden states live in base.css. */
+@media (prefers-reduced-motion: no-preference) {
+  .js .section-title .h2-line,
+  .js .about-copy .h2-line {
+    transition: transform 650ms var(--ease-out) calc(var(--reveal-delay, 0ms) + 90ms);
+  }
+  .js .section-title h2::after,
+  .js .about-copy h2::after {
+    transition: transform 500ms var(--ease-out) calc(var(--reveal-delay, 0ms) + 420ms);
+  }
+  /* Same instant reset for the heading choreography, or the line would be
+     seen sliding back down into its mask on the way out. (0,4,0) > (0,3,0). */
+  .js .section-title:not(.is-visible) .h2-line,
+  .js .about-copy:not(.is-visible) .h2-line,
+  .js .section-title:not(.is-visible) h2::after,
+  .js .about-copy:not(.is-visible) h2::after { transition: none; }
+}
+
+/* 9 items would otherwise trail 640ms behind the first */
+.portfolio-grid { --reveal-step: 60ms; }
+
+@media (max-width: 600px) {
+  .js [data-reveal] { --reveal-y: 24px; --reveal-x: 28px; }
+}
+
+/* ---------- Buttons ---------- */
+.btn {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2xs);
+  padding: 0.95em 1.9em;
+  border-radius: var(--radius-pill);
+  font-family: var(--font-display);
+  font-stretch: var(--wdth-display);
+  font-weight: 700;
+  font-size: var(--fs-sm);
+  letter-spacing: 0.02em;
+  border: 1px solid transparent;
+  cursor: pointer;
+  overflow: hidden;
+  transition: transform var(--dur-fast) var(--ease-out),
+              box-shadow var(--dur-fast) var(--ease-out),
+              background var(--dur-fast) var(--ease-out),
+              border-color var(--dur-fast) var(--ease-out),
+              color var(--dur-fast) var(--ease-out);
+}
+
+/* A light sweeps across the button on hover — one short specular pass, which
+   suits a business whose product is literally clean glass. */
+.btn::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: -60%;
+  width: 45%;
+  background: linear-gradient(100deg, transparent, rgba(255, 255, 255, 0.42), transparent);
+  transform: skewX(-18deg);
+  opacity: 0;
+  pointer-events: none;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .btn:hover::after {
+    opacity: 1;
+    animation: btn-sheen 700ms var(--ease-out);
+  }
+}
+@keyframes btn-sheen {
+  from { left: -60%; }
+  to   { left: 115%; }
+}
+
+.btn-primary {
+  background: var(--grad-accent);
+  color: var(--color-on-accent);
+  box-shadow: var(--glow-accent);
+}
+.btn-primary:hover {
+  color: var(--color-on-accent);
+  transform: translateY(-2px);
+  box-shadow: var(--glow-accent-lg);
+  filter: brightness(1.08);
+}
+
+/* WhatsApp keeps its own brand green so the button is recognisable at a
+   glance, but pairs it with near-black rather than the white WhatsApp uses
+   in-app — white on #25D366 is only ~2.2:1, which this text size fails. */
+.btn-whatsapp {
+  background: #25D366;
+  color: #06281A;
+  box-shadow: 0 10px 30px -12px rgba(37, 211, 102, 0.65);
+}
+.btn-whatsapp:hover {
+  background: #1EBE5B;
+  color: #06281A;
+  transform: translateY(-2px);
+  box-shadow: 0 18px 44px -14px rgba(37, 211, 102, 0.75);
+}
+.btn-whatsapp .icon { width: 1.15em; height: 1.15em; }
+
+.btn-lg { padding: 1.05em 2.3em; font-size: var(--fs-base); }
+
+.contact-cta {
+  margin-top: var(--space-xl);
+  text-align: center;
+}
+.contact-cta-note {
+  margin-top: var(--space-sm);
+  font-size: var(--fs-sm);
+  color: var(--color-text-muted);
+  max-width: 46ch;
+  margin-inline: auto;
+}
+
+.btn-ghost {
+  background: rgba(255, 255, 255, 0.10);
+  color: #fff;
+  border-color: rgba(255, 255, 255, 0.45);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+.btn-ghost:hover {
+  background: rgba(255, 255, 255, 0.2);
+  border-color: #fff;
+  color: #fff;
+  transform: translateY(-2px);
+}
+
+/* ---------- Hero ---------- */
+#hero {
+  position: relative;
+  /* Exact fit: topbar + header + hero = one viewport, so the carousel
+     controls at the hero's bottom edge are never pushed below the fold.
+     svh keeps this stable when the iOS URL bar collapses. --safe-top is the
+     status-bar strip the topbar grew by. */
+  height: min(calc(100vh - var(--safe-top) - var(--topbar-h) - var(--header-h)), 820px);
+  height: min(calc(100svh - var(--safe-top) - var(--topbar-h) - var(--header-h)), 820px);
+  min-height: 520px;
+  overflow: hidden;
+}
+
+.hero-track {
+  display: flex;
+  height: 100%;
+  scroll-snap-type: x mandatory;
+  overflow-x: hidden;
+  overflow-y: hidden;
+}
+
+.hero-slide {
+  position: relative;
+  flex: 0 0 100%;
+  height: 100%;
+  scroll-snap-align: start;
+  display: flex;
+  align-items: center;
+  /* Clips the ken-burns-scaled image so it can't widen the scroll track */
+  overflow: hidden;
+}
+
+.hero-slide img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  z-index: 0;
+  transform: scale(1.05);
+}
+
+/* A layered scrim instead of a flat wash: a pool of shadow anchored in the
+   bottom-left corner where the copy sits, a light top band so the header
+   floats, and a soft foot for the carousel controls. The copy column keeps
+   its contrast on every one of the three photographs.
+
+   The pool decays quickly to the right on purpose. The van is the brand's
+   most recognisable asset and its red and yellow turn to maroon and olive
+   under any even wash — so the right half of the frame, where the van sits,
+   is left close to the photographer's own exposure. */
+.hero-slide::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background:
+    radial-gradient(115% 112% at 6% 102%, rgba(6, 9, 11, 0.90) 0%, rgba(6, 9, 11, 0.55) 38%, rgba(6, 9, 11, 0.18) 60%, transparent 78%),
+    linear-gradient(180deg, rgba(6, 9, 11, 0.50) 0%, rgba(6, 9, 11, 0.06) 34%, rgba(6, 9, 11, 0.14) 66%, rgba(6, 9, 11, 0.48) 100%);
+}
+
+/* Opt-in heavier scrim, for a slide whose photograph is bright across the
+   middle of the frame. The decal shot is a close-up of large white lettering
+   sitting exactly where the headline goes; at the default exposure the two
+   sets of white type fight each other. Dimming that slide alone pushes the
+   photograph back into being a background without touching the other two. */
+.hero-slide--dim::after {
+  background:
+    radial-gradient(125% 125% at 8% 100%, rgba(6, 9, 11, 0.94) 0%, rgba(6, 9, 11, 0.74) 40%, rgba(6, 9, 11, 0.52) 66%, rgba(6, 9, 11, 0.38) 100%),
+    linear-gradient(180deg, rgba(6, 9, 11, 0.56) 0%, rgba(6, 9, 11, 0.30) 40%, rgba(6, 9, 11, 0.62) 100%);
+}
+
+.hero-slide .hero-content {
+  position: relative;
+  z-index: 2;
+  color: #fff;
+  max-width: 700px;
+}
+
+.hero-badge {
+  position: relative;   /* anchors the ping ring below */
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6em;
+  font-family: var(--font-display);
+  font-stretch: var(--wdth-display);
+  font-size: var(--fs-sm);
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #fff;
+  padding: 0.45em 1.1em 0.45em 0.9em;
+  border-radius: var(--radius-pill);
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  background: rgba(255, 255, 255, 0.10);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  margin-bottom: var(--space-md);
+}
+/* Fixed mint rather than the accent token — the badge sits on the dark hero
+   scrim in both themes, and the light theme's accent would go invisible. */
+.hero-badge::before {
+  content: "";
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #63D0AE;
+  box-shadow: 0 0 0 4px rgba(99, 208, 174, 0.25);
+  flex-shrink: 0;
+}
+
+/* Same ping as the section eyebrows (keyframes in base.css), keyed on the
+   active slide, in the badge's fixed mint for the same reason as its dot. */
+@media (prefers-reduced-motion: no-preference) {
+  .hero-slide.is-active .hero-badge::after {
+    content: "";
+    position: absolute;
+    left: 0.9em;   /* the dot sits at the badge's 0.9em left padding */
+    top: 50%;
+    width: 7px;
+    height: 7px;
+    margin-top: -3.5px;
+    border-radius: 50%;
+    border: 1px solid rgba(99, 208, 174, 0.9);
+    animation: eyebrow-ping 3.2s var(--ease-out) infinite 1.4s;
+  }
+}
+
+/* At 390px the badge wraps "since 1996" onto a second line and the pill loses
+   its shape — tighten the tracking rather than shorten the claim. */
+@media (max-width: 560px) {
+  .hero-badge {
+    font-size: 0.72rem;
+    letter-spacing: 0.06em;
+    padding-inline: 0.85em 0.9em;
+  }
+}
+
+.hero-slide h2 {
+  color: #fff;
+  font-size: var(--fs-4xl);
+  font-stretch: var(--wdth-hero);
+  font-weight: 800;
+  line-height: var(--lh-hero);
+  letter-spacing: -0.035em;
+  margin-bottom: var(--space-sm);
+  text-shadow: 0 2px 30px rgba(0, 0, 0, 0.45);
+}
+/* One word per headline carries the accent — the cheapest way to make three
+   otherwise-plain photo slides look art-directed. */
+.hero-slide h2 em {
+  font-style: normal;
+  /* Bright pair hard-coded for the same reason as the badge dot: the hero is
+     dark-scrimmed in both themes, and the light theme's accent is a dark teal
+     that would all but vanish against the photograph. */
+  background: linear-gradient(118deg, #4FB6C9 0%, #63D0AE 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  /* The inherited shadow would print behind the glyphs and show through the
+     transparent fill as grime. */
+  text-shadow: none;
+}
+
+.hero-slide p {
+  font-size: var(--fs-lg);
+  color: rgba(255, 255, 255, 0.9);
+  margin-bottom: var(--space-lg);
+  max-width: 46ch;
+  text-shadow: 0 1px 14px rgba(0, 0, 0, 0.5);
+}
+
+.hero-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-xs);
+}
+
+/* --- Slide entrance ---
+   Content of the slide that just became current rises in, staggered.
+
+   Gated on .hero-ready, which initHeroCarousel() adds — NOT on the .js class
+   the head script sets. .js only means scripting exists; if main.js failed to
+   load, nothing would ever add .is-active and every slide's copy would sit at
+   opacity 0 forever. This way the hidden state cannot outlive the code that
+   un-hides it. */
+@media (prefers-reduced-motion: no-preference) {
+  #hero.hero-ready .hero-slide .hero-content > * {
+    opacity: 0;
+    transform: translate3d(0, 26px, 0);
+  }
+  #hero.hero-ready .hero-slide.is-active .hero-content > * {
+    animation: hero-in 800ms var(--ease-out) forwards;
+  }
+  #hero.hero-ready .hero-slide.is-active .hero-content > :nth-child(1) { animation-delay: 60ms; }
+  #hero.hero-ready .hero-slide.is-active .hero-content > :nth-child(2) { animation-delay: 170ms; }
+  #hero.hero-ready .hero-slide.is-active .hero-content > :nth-child(3) { animation-delay: 280ms; }
+  #hero.hero-ready .hero-slide.is-active .hero-content > :nth-child(4) { animation-delay: 390ms; }
+
+  /* Slow push into the frame, restarted each time a slide becomes current */
+  #hero.hero-ready .hero-slide.is-active img {
+    animation: ken-burns 11s var(--ease-soft) forwards;
+  }
+}
+
+@keyframes hero-in {
+  to { opacity: 1; transform: none; }
+}
+@keyframes ken-burns {
+  from { transform: scale(1.05) translate3d(0, 0, 0); }
+  to   { transform: scale(1.15) translate3d(-1.6%, -1.4%, 0); }
+}
+
+/* --- Word-level headline stagger ---
+   initHeroHeadlineSplit() wraps each headline's words in .w spans and adds
+   .hero-split. Every selector requires BOTH .hero-ready and .hero-split, so
+   if the split never ran (old browser, JS error, reduced motion) the
+   block-level entrance above keeps working unchanged. The h2 hands its
+   entrance over to its words: it goes permanently visible and each word
+   rises on its own --w-i delay. The <em> keeps its own gradient rule — it is
+   never transformed itself, only carried by its .w wrapper. */
+@media (prefers-reduced-motion: no-preference) {
+  #hero.hero-ready.hero-split .hero-slide .hero-content > h2 {
+    opacity: 1;
+    transform: none;
+    animation: none;
+  }
+  #hero.hero-ready.hero-split .hero-slide h2 .w {
+    display: inline-block;
+    opacity: 0;
+    transform: translate3d(0, 0.55em, 0);
+  }
+  #hero.hero-ready.hero-split .hero-slide.is-active h2 .w {
+    animation: hero-in 700ms var(--ease-out) forwards;
+    animation-delay: calc(150ms + var(--w-i, 0) * 45ms);
+  }
+}
+
+.hero-controls {
+  position: absolute;
+  z-index: 3;
+  bottom: var(--space-md);
+  left: 0; right: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-md);
+}
+
+/* Shown at every width. The track is overflow-x:hidden, so there is no swipe
+   to fall back on — without these the dots would be the only way off slide one
+   on a phone. 44px is the minimum comfortable tap target, so the size holds
+   on small screens rather than shrinking with the viewport. */
+.hero-arrow {
+  width: 44px; height: 44px;
+  border-radius: var(--radius-pill);
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.36);
+  color: #fff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  transition: background var(--dur-fast) var(--ease-out),
+              border-color var(--dur-fast) var(--ease-out),
+              transform var(--dur-fast) var(--ease-out);
+}
+.hero-arrow:hover {
+  background: rgba(255, 255, 255, 0.24);
+  border-color: #fff;
+  transform: scale(1.06);
+}
+.hero-arrow svg { width: 18px; height: 18px; }
+
+.hero-dots {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2xs);
+}
+/* The current dot stretches into a bar that fills over the autoplay interval,
+   so the carousel tells you how long you have before it moves on. */
+.hero-dot {
+  width: 10px; height: 10px;
+  border-radius: var(--radius-pill);
+  background: rgba(255, 255, 255, 0.42);
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  overflow: hidden;
+  transition: width var(--dur-base) var(--ease-out),
+              background var(--dur-fast) var(--ease-out);
+}
+.hero-dot:hover { background: rgba(255, 255, 255, 0.7); }
+.hero-dot.is-active {
+  width: 44px;
+  background: rgba(255, 255, 255, 0.3);
+}
+.hero-dot.is-active::after {
+  content: "";
+  display: block;
+  width: 100%;
+  height: 100%;
+  border-radius: inherit;
+  background: #fff;
+  transform: scaleX(0);
+  transform-origin: 0 50%;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .hero-dot.is-active::after {
+    animation: dot-fill 6s linear forwards;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .hero-dot.is-active::after { transform: none; }
+}
+/* Autoplay is held (pointer over the hero, focus inside it, tab hidden) —
+   park the fill so the bar isn't promising a change that won't come. */
+#hero.hero-paused .hero-dot.is-active::after { animation-play-state: paused; }
+@keyframes dot-fill {
+  to { transform: scaleX(1); }
+}
+
+/* Scroll cue — a thin rail with a light travelling down it. Sits opposite the
+   copy so it never competes with the headline, and only on screens tall and
+   wide enough that there is obviously more page below. */
+.hero-cue {
+  position: absolute;
+  z-index: 3;
+  right: clamp(1.25rem, 4vw, 2.5rem);
+  bottom: var(--space-lg);
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-sm);
+  color: rgba(255, 255, 255, 0.72);
+}
+@media (min-width: 900px) {
+  .hero-cue { display: flex; }
+}
+
+.hero-cue-label {
+  writing-mode: vertical-rl;
+  font-family: var(--font-display);
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+}
+
+.hero-cue-rail {
+  position: relative;
+  display: block;
+  width: 1px;
+  height: 68px;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.26);
+}
+.hero-cue-rail span {
+  position: absolute;
+  inset: 0;
+  display: block;
+  background: linear-gradient(to bottom, transparent, #fff, transparent);
+  opacity: 0;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .hero-cue-rail span { animation: cue-travel 2.6s var(--ease-soft) infinite; }
+}
+@keyframes cue-travel {
+  0%   { transform: translateY(-100%); opacity: 0; }
+  30%  { opacity: 1; }
+  70%  { opacity: 1; }
+  100% { transform: translateY(100%); opacity: 0; }
+}
+
+/* ---------- Service ticker ----------
+   A quiet marquee band between the hero and the page proper. The track holds
+   two identical groups and translates exactly -50%, so the loop has no seam;
+   each group carries its own trailing padding equal to the item gap, which is
+   what makes the -50% land precisely. Deliberately understated — muted small
+   caps and hairline borders — so it reads as a signature, not a billboard.
+   Compositor-only transform; it is one small element, so unlike the deco
+   layers it is not IO-parked when off screen. */
+.ticker {
+  overflow: hidden;
+  border-block: 1px solid var(--color-border);
+  padding-block: var(--space-xs);
+}
+
+.ticker-track {
+  display: flex;
+  width: max-content;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .ticker-track { animation: ticker-scroll 32s linear infinite; }
+  .ticker:hover .ticker-track { animation-play-state: paused; }
+}
+
+.ticker-group {
+  display: flex;
+  align-items: center;
+  gap: var(--space-lg);
+  padding-right: var(--space-lg);   /* the seam gap — must equal the item gap */
+}
+
+.ticker-group > span {
+  font-family: var(--font-display);
+  font-stretch: var(--wdth-display);
+  font-weight: 600;
+  font-size: var(--fs-sm);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+  white-space: nowrap;
+}
+
+.ticker-group > svg {
+  width: 12px;
+  height: 12px;
+  color: var(--color-accent);
+  opacity: 0.7;
+}
+
+@keyframes ticker-scroll {
+  to { transform: translate3d(-50%, 0, 0); }
+}
+
+/* Static under reduced motion: one group, centred, allowed to wrap */
+@media (prefers-reduced-motion: reduce) {
+  .ticker-track { width: auto; justify-content: center; }
+  .ticker-group {
+    flex-wrap: wrap;
+    justify-content: center;
+    padding-right: 0;
+    row-gap: var(--space-2xs);
+  }
+  .ticker-group[aria-hidden="true"] { display: none; }
+}
+
+/* ---------- About ---------- */
+.about-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-xl);
+  align-items: center;
+}
+@media (max-width: 860px) {
+  .about-grid { grid-template-columns: 1fr; }
+}
+
+/* An offset accent outline behind the photo, the way a print layout would
+   register two plates slightly apart. Costs nothing and reads as intent. */
+.about-media {
+  position: relative;
+}
+.about-media::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: var(--radius-lg);
+  border: 1.5px solid var(--color-accent);
+  opacity: 0.45;
+  transform: translate(18px, 18px);
+  pointer-events: none;
+}
+.about-media picture {
+  display: block;
+  position: relative;
+}
+
+/* Reveal choreography: the photo slides in from the left (data-reveal="left"),
+   then the accent outline "registers" into its offset like a second print
+   plate, and the badge pops last. Transitions sit on the hidden state so the
+   timings hold whichever way the classes settle. */
+@media (prefers-reduced-motion: no-preference) {
+  .js .about-media[data-reveal]::before {
+    transform: translate(2px, 2px);
+    opacity: 0;
+    transition: transform 900ms var(--ease-out) 250ms,
+                opacity 500ms var(--ease-out) 250ms;
+  }
+  .js .about-media[data-reveal].is-visible::before {
+    transform: translate(18px, 18px);
+    opacity: 0.45;
+  }
+  .js .about-media[data-reveal] .about-badge {
+    opacity: 0;
+    transform: scale(0.8);
+    transition: opacity 400ms var(--ease-out) 500ms,
+                transform 600ms var(--ease-back) 500ms;
+  }
+  .js .about-media[data-reveal].is-visible .about-badge {
+    opacity: 1;
+    transform: none;
+  }
+  /* Reveals replay: snap the plate and badge back instantly on the way out,
+     like the card itself (see the :not(.is-visible) rule at the top). */
+  .js .about-media[data-reveal]:not(.is-visible)::before,
+  .js .about-media[data-reveal]:not(.is-visible) .about-badge { transition: none; }
+}
+
+.about-media img {
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  aspect-ratio: 4 / 3.6;
+  object-fit: cover;
+  width: 100%;
+  /* Required: the height="" attribute is a presentational hint, and with both
+     dimensions definite the browser ignores aspect-ratio entirely. */
+  height: auto;
+}
+
+.about-badge {
+  position: absolute;
+  left: calc(-1 * var(--space-sm));
+  bottom: var(--space-lg);
+  z-index: 2;
+  display: flex;
+  align-items: baseline;
+  gap: 0.5em;
+  padding: var(--space-2xs) var(--space-md);
+  border-radius: var(--radius-pill);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  box-shadow: var(--shadow-md);
+  font-family: var(--font-display);
+  font-size: var(--fs-sm);
+  color: var(--color-text-muted);
+  white-space: nowrap;
+}
+.about-badge strong {
+  font-size: var(--fs-xl);
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  background: var(--grad-accent);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  /* initCountUp() rewrites the digits every frame — equal-width numerals
+     keep the pill from jittering while it counts. */
+  font-variant-numeric: tabular-nums;
+}
+@media (max-width: 420px) {
+  .about-badge { left: 0; font-size: 0.78rem; padding-inline: var(--space-sm); }
+}
+
+.about-copy p {
+  color: var(--color-text-muted);
+  margin-bottom: var(--space-xs);
+}
+
+/* ---------- Icon tiles ----------
+   Every tinted square that holds a glyph — services, about, contact, FAQ —
+   centres it the same way. place-items on a grid centres in both axes with no
+   baseline in play, and the block-level svg drops the inline half-leading that
+   was riding the glyph a couple of pixels high. Size and colour stay with each
+   component below; this rule owns nothing but the centring. */
+.icon-tile {
+  display: grid;
+  place-items: center;
+  line-height: 0;
+}
+.icon-tile > svg { display: block; }
+
+.icon-box-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-sm);
+  margin-top: var(--space-lg);
+}
+@media (max-width: 520px) {
+  .icon-box-grid { grid-template-columns: 1fr; }
+}
+
+.icon-box {
+  position: relative;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: var(--space-md);
+  transition: transform var(--dur-base) var(--ease-out),
+              box-shadow var(--dur-base) var(--ease-out),
+              border-color var(--dur-base) var(--ease-out),
+              background var(--dur-base) var(--ease-out);
+}
+.icon-box:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-md);
+  border-color: var(--color-border-strong);
+  background: var(--color-surface-2);
+}
+.icon-box .icon-tile {
+  width: 38px; height: 38px;
+  border-radius: var(--radius-sm);
+  background: var(--tint-accent-soft);
+  border: 1px solid var(--ring-accent);
+  color: var(--color-accent);
+  margin-bottom: var(--space-2xs);
+}
+.icon-box .icon-tile svg { width: 19px; height: 19px; }
+.icon-box h4 { font-size: var(--fs-base); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: var(--space-2xs); }
+.icon-box p { color: var(--color-text-muted); font-size: var(--fs-sm); line-height: 1.45; }
+
+/* ---------- Services — bento grid ----------
+   The first and last cards run two columns wide and lay their icon beside the
+   copy, so the block reads as a composition rather than four identical tiles.
+   Below 980px it falls back to the plain 2-up / 1-up stack. */
+.services-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--space-md);
+}
+@media (min-width: 981px) {
+  .services-grid { grid-template-columns: repeat(3, 1fr); }
+  .service-card:nth-child(1),
+  .service-card:nth-child(4) {
+    grid-column: span 2;
+    display: grid;
+    grid-template-columns: auto 1fr;
+    column-gap: var(--space-md);
+    /* Centred, not start-aligned: a wide card carries the same copy in half
+       the lines as its narrow neighbour, and the row is as tall as the
+       tallest card — top-aligning would leave a dead half at the bottom. */
+    align-content: center;
+  }
+  .service-card:nth-child(1) .icon-tile,
+  .service-card:nth-child(4) .icon-tile {
+    grid-row: 1 / span 2;
+    /* The tile spans the heading and the copy; without this it stretches to
+       the top of that span and reads as sitting high beside them. */
+    align-self: center;
+    margin-bottom: 0;
+  }
+  .service-card:nth-child(1) h4,
+  .service-card:nth-child(4) h4 { font-size: var(--fs-xl); }
+}
+@media (max-width: 560px) {
+  .services-grid { grid-template-columns: 1fr; }
+}
+
+.service-card {
+  position: relative;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-lg) var(--space-md);
+  overflow: hidden;
+  transition: transform var(--dur-base) var(--ease-out),
+              box-shadow var(--dur-base) var(--ease-out),
+              border-color var(--dur-base) var(--ease-out);
+}
+
+/* A gradient hairline along the top edge that widens to the full card on
+   hover — the "lit from above" cue that gives the grid its depth. */
+.service-card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 24%;
+  right: 24%;
+  height: 1.5px;
+  background: var(--grad-accent);
+  opacity: 0;
+  transition: opacity var(--dur-base) var(--ease-out),
+              left var(--dur-slow) var(--ease-out),
+              right var(--dur-slow) var(--ease-out);
+}
+.service-card:hover::before { opacity: 1; left: 0; right: 0; }
+
+/* Pointer-tracked spotlight. --mx/--my are written by initCardSpotlight();
+   with no pointer (touch, keyboard) the fallback centres it harmlessly. */
+.service-card::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(380px circle at var(--mx, 50%) var(--my, 0%),
+              rgba(79, 182, 201, 0.16), transparent 62%);
+  opacity: 0;
+  transition: opacity var(--dur-base) var(--ease-out);
+}
+.service-card:hover::after { opacity: 1; }
+
+.service-card:hover {
+  transform: translateY(-6px);
+  box-shadow: var(--shadow-lg);
+  border-color: var(--ring-accent);
+}
+.service-card .icon-tile {
+  width: 56px; height: 56px;
+  border-radius: var(--radius-md);
+  background: var(--tint-accent-soft);
+  border: 1px solid var(--ring-accent);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.07);
+  color: var(--color-accent);
+  margin-bottom: var(--space-md);
+  transition: transform var(--dur-base) var(--ease-back),
+              box-shadow var(--dur-base) var(--ease-out),
+              color var(--dur-base) var(--ease-out);
+}
+.service-card:hover .icon-tile {
+  transform: translateY(-2px) scale(1.06);
+  box-shadow: var(--glow-accent), inset 0 1px 0 rgba(255, 255, 255, 0.07);
+  color: var(--color-accent-strong);
+}
+.service-card .icon-tile svg { width: 27px; height: 27px; }
+.service-card h4 { margin-bottom: var(--space-xs); position: relative; }
+.service-card p { color: var(--color-text-muted); font-size: var(--fs-sm); position: relative; }
+
+/* ---------- Photo gallery ---------- */
+.portfolio-filters {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: var(--space-2xs);
+  margin-bottom: var(--space-lg);
+}
+.portfolio-filters button {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  color: var(--color-text-muted);
+  padding: 0.55em 1.35em;
+  border-radius: var(--radius-pill);
+  font-family: var(--font-display);
+  font-stretch: var(--wdth-display);
+  font-weight: 600;
+  font-size: var(--fs-sm);
+  cursor: pointer;
+  transition: color var(--dur-fast) var(--ease-out),
+              border-color var(--dur-fast) var(--ease-out),
+              background var(--dur-fast) var(--ease-out),
+              box-shadow var(--dur-fast) var(--ease-out);
+}
+.portfolio-filters button:hover {
+  border-color: var(--color-accent);
+  color: var(--color-accent);
+}
+.portfolio-filters button.is-active {
+  background: var(--grad-accent);
+  border-color: transparent;
+  color: var(--color-on-accent);
+  box-shadow: var(--glow-accent);
+}
+
+/* One swipeable snap row instead of a 3x3 grid — a full grid of nine photos
+   cannot fit a laptop viewport, a strip always does. The scroller owns its
+   own x-overflow, so the page never gains a horizontal scrollbar. The mask
+   fades both ends, which is what makes it read as "there is more this way"
+   rather than as a row that happens to be cut off. */
+.portfolio-grid {
+  display: flex;
+  gap: var(--space-sm);
+  overflow-x: auto;
+  scroll-snap-type: x proximity;
+  padding-bottom: var(--space-sm);
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-accent) transparent;
+  -webkit-mask-image: linear-gradient(to right, transparent, #000 28px, #000 calc(100% - 28px), transparent);
+  mask-image: linear-gradient(to right, transparent, #000 28px, #000 calc(100% - 28px), transparent);
+}
+
+.portfolio-grid > .portfolio-item {
+  flex: 0 0 clamp(260px, 66vw, 380px);
+  scroll-snap-align: start;
+}
+
+/* --- Strip nav: position rail + paging arrows ---
+   Gated on .js because only initPortfolioStrip() makes these controls do
+   anything — without scripting the strip still scrolls natively and keeps
+   its themed scrollbar, so dead chrome would be worse than none. The rail is
+   position feedback rather than decoration, which is why its scaleX keeps a
+   (short, linear) transition even though arrows jump under reduced motion. */
+.strip-nav { display: none; }
+.js .strip-nav {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  margin-top: var(--space-sm);
+}
+.js .strip-nav[hidden] { display: none; }   /* nothing overflows — no controls */
+
+.strip-progress {
+  flex: 1;
+  height: 3px;
+  border-radius: var(--radius-pill);
+  background: var(--color-border);
+  overflow: hidden;
+}
+.strip-progress-bar {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--grad-accent);
+  transform: scaleX(var(--strip-p, 0));
+  transform-origin: 0 50%;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .strip-progress-bar { transition: transform 120ms linear; }
+}
+
+.strip-arrow {
+  width: 44px;
+  height: 44px;
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-pill);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  color: var(--color-text-muted);
+  cursor: pointer;
+  transition: color var(--dur-fast) var(--ease-out),
+              border-color var(--dur-fast) var(--ease-out),
+              background var(--dur-fast) var(--ease-out);
+}
+.strip-arrow:hover {
+  border-color: var(--color-accent);
+  color: var(--color-accent);
+}
+.strip-arrow[disabled] {
+  opacity: 0.35;
+  pointer-events: none;
+}
+.strip-arrow svg { width: 18px; height: 18px; }
+
+.portfolio-item {
+  position: relative;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  aspect-ratio: 4 / 3;
+  cursor: pointer;
+  background: var(--color-bg-alt);
+  border: 1px solid var(--color-border);
+  padding: 0;
+  display: block;
+  width: 100%;
+  transition: transform var(--dur-base) var(--ease-out),
+              box-shadow var(--dur-base) var(--ease-out),
+              border-color var(--dur-base) var(--ease-out);
+}
+.portfolio-item[hidden] { display: none; }
+.portfolio-item:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-lg);
+  border-color: var(--ring-accent);
+}
+
+.portfolio-item img {
+  width: 100%; height: 100%;
+  object-fit: cover;
+  transition: transform var(--dur-slow) var(--ease-out);
+}
+.portfolio-item:hover img { transform: scale(1.07); }
+
+/* The caption is permanent rather than hover-only: on a phone there is no
+   hover, and a strip of unlabelled photos tells a visitor nothing. */
+.portfolio-item .portfolio-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(6, 9, 11, 0) 42%, rgba(6, 9, 11, 0.82) 100%);
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-end;
+  gap: 4px;
+  padding: var(--space-sm);
+  text-align: left;
+}
+
+/* Fixed colors, not theme tokens: this pill sits on a photograph under a dark
+   scrim in both themes, so following the theme would flip it to dark-on-dark. */
+.portfolio-cat {
+  font-family: var(--font-display);
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: #06181C;
+  background: #7ED0DE;
+  border-radius: var(--radius-pill);
+  padding: 0.25em 0.75em;
+}
+
+.portfolio-name {
+  color: #fff;
+  font-family: var(--font-display);
+  font-stretch: var(--wdth-display);
+  font-weight: 700;
+  font-size: var(--fs-base);
+  line-height: 1.25;
+  text-shadow: 0 1px 10px rgba(0, 0, 0, 0.6);
+}
+
+/* The eye button is the hover/focus affordance that used to be the whole
+   overlay — now it just says "this one opens". */
+.portfolio-view {
+  position: absolute;
+  top: var(--space-sm);
+  right: var(--space-sm);
+  width: 38px; height: 38px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  background: rgba(255, 255, 255, 0.16);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  opacity: 0;
+  transform: scale(0.85);
+  transition: opacity var(--dur-base) var(--ease-out),
+              transform var(--dur-base) var(--ease-back);
+}
+.portfolio-item:hover .portfolio-view,
+.portfolio-item:focus-visible .portfolio-view {
+  opacity: 1;
+  transform: none;
+}
+.portfolio-view svg { width: 17px; height: 17px; }
+
+/* Lightbox dialog */
+.lightbox {
+  border: none;
+  padding: 0;
+  background: transparent;
+  max-width: min(92vw, 1100px);
+  max-height: 88vh;
+}
+.lightbox::backdrop {
+  background: rgba(6, 9, 11, 0.88);
+  backdrop-filter: blur(6px);
+}
+.lightbox img {
+  display: block;
+  max-width: min(92vw, 1100px);
+  max-height: 80vh;
+  width: auto;
+  height: auto;
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-lg);
+  margin-inline: auto;
+}
+.lightbox-caption {
+  text-align: center;
+  color: #fff;
+  font-family: var(--font-display);
+  font-size: var(--fs-sm);
+  letter-spacing: 0.04em;
+  margin-top: var(--space-sm);
+}
+.lightbox-close {
+  position: fixed;
+  top: calc(var(--space-md) + var(--safe-top));
+  right: calc(var(--space-md) + var(--safe-right));
+  width: 44px; height: 44px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.12);
+  border: 1px solid rgba(255,255,255,0.35);
+  color: #fff;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer;
+  transition: background var(--dur-fast) var(--ease-out);
+}
+.lightbox-close:hover { background: rgba(255,255,255,0.24); }
+.lightbox-close svg { width: 18px; height: 18px; }
+.lightbox-nav {
+  position: fixed;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 48px; height: 48px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.12);
+  border: 1px solid rgba(255,255,255,0.35);
+  color: #fff;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer;
+  transition: background var(--dur-fast) var(--ease-out);
+}
+.lightbox-nav:hover { background: rgba(255,255,255,0.24); }
+.lightbox-nav svg { width: 20px; height: 20px; }
+.lightbox-nav.prev { left: calc(var(--space-md) + var(--safe-left)); }
+.lightbox-nav.next { right: calc(var(--space-md) + var(--safe-right)); }
+@media (max-width: 600px) {
+  .lightbox-nav { display: none; }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  @supports (view-transition-name: none) {
+    .lightbox { view-transition-name: lightbox; }
+  }
+}
+
+/* ---------- Theme wipe ----------
+   The new theme sweeps out as a circle from the toggle button. Everything is
+   scoped under .theme-wipe, which initThemeToggle() adds only around its own
+   startViewTransition call — so the lightbox's default root cross-fade above
+   is untouched. Both default snapshot animations are disabled here; the wipe
+   itself is a WAAPI animation initThemeToggle() plays on the new(root)
+   pseudo after transition.ready resolves — i.e. only once the full-page
+   restyle and snapshot are already paid for, which is what keeps the circle
+   from hitching on its first frames. */
+@supports (view-transition-name: none) {
+  html.theme-wipe::view-transition-old(root) { animation: none; }
+  html.theme-wipe::view-transition-new(root) { animation: none; }
+}
+
+/* Everything that loops keeps repainting beneath the wipe and competes with
+   it for frame budget — park it all for the wipe's half-second. !important
+   on purpose: this must beat every per-layer animation rule regardless of
+   specificity, and the class is gone again when the transition finishes. */
+html.theme-wipe .deco-layer,
+html.theme-wipe .ticker-track,
+html.theme-wipe .hero-slide img,
+html.theme-wipe .hero-cue-rail span,
+html.theme-wipe .hero-dot.is-active::after,
+html.theme-wipe .eyebrow::after,
+html.theme-wipe .hero-badge::after {
+  animation-play-state: paused !important;
+}
+/* The full-viewport film grain is the single most expensive layer in the
+   snapshot; at 2–4% alpha its absence during the wipe is imperceptible.
+   Ditto the droplet overlay — a dozen live backdrop-filters have no place
+   inside a view-transition snapshot. */
+.theme-wipe body::after { display: none; }
+/* visibility, not display: display:none would reset the droplets' one-shot
+   intro animations, replaying the whole rain sequence after the wipe. */
+.theme-wipe .droplets { visibility: hidden; }
+
+/* ---------- Team ----------
+   A ten-column bed so the tiles can take unequal widths and still line up.
+   Tim's tile is four columns and spans both rows; the rest sit to his right,
+   three across on the top row and two wider ones beneath. The spans come off
+   :nth-child, so each breakpoint restates the arrangement without the markup
+   knowing anything about it. */
+.team-grid {
+  /* Lines of role copy each caption reserves. The names are what the eye
+     tracks across a row, so every caption holds the same height whatever its
+     text runs to — otherwise a one-line role floats its name up and a
+     three-line role pushes it down. Restated per breakpoint below, where the
+     tiles narrow and the copy takes more lines. */
+  --role-lines: 3;
+  display: grid;
+  grid-template-columns: repeat(10, 1fr);
+  gap: var(--space-sm);
+  max-width: 1080px;
+  margin-inline: auto;
+}
+
+.team-member {
+  position: relative;
+  margin: 0;
+  grid-column: span 2;
+  aspect-ratio: 4 / 5;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-md);
+  transition: transform var(--dur-base) var(--ease-out),
+              box-shadow var(--dur-base) var(--ease-out),
+              border-color var(--dur-base) var(--ease-out);
+}
+.team-member:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-lg);
+  border-color: var(--ring-accent);
+}
+
+/* The two lower tiles run wider than the three above them. Their extra width
+   is matched by a wider aspect so both rows finish at the same height. */
+.team-member:nth-child(5),
+.team-member:nth-child(6) {
+  grid-column: span 3;
+  aspect-ratio: 6 / 5;
+}
+
+/* aspect-ratio:auto because the row span already fixes the height: whatever
+   the two rows beside it come to, plus the gap. */
+.team-member--lead {
+  grid-column: span 4;
+  grid-row: span 2;
+  aspect-ratio: auto;
+}
+
+.team-member .pic {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+.team-member .pic picture { display: block; height: 100%; }
+.team-member .pic img {
+  width: 100%; height: 100%;
+  object-fit: cover;
+  /* Tim is high in his frame — a centred crop at the square and landscape
+     breakpoints would cut his head off. */
+  object-position: 50% 22%;
+  transition: transform var(--dur-slow) var(--ease-out);
+}
+.team-member:hover .pic img { transform: scale(1.05); }
+
+/* Denys's frame carries a lot of sky above him, and his is one of the two wide
+   tiles — at the shared 22% the landscape crop spends its top third on cloud.
+   Only the landscape crop is affected: at the phone breakpoint his tile is
+   portrait, the square source fills it top to bottom, and this has no effect. */
+.team-member:nth-child(5) .pic img { object-position: 50% 58%; }
+
+/* Inset ring rather than a border, so it lands on top of the photo and can
+   animate in without shifting the layout by a pixel. */
+.team-member .pic::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  box-shadow: inset 0 0 0 2px transparent;
+  transition: box-shadow var(--dur-base) var(--ease-out);
+  pointer-events: none;
+}
+.team-member:hover .pic::after { box-shadow: inset 0 0 0 2px var(--color-accent); }
+
+/* --- Placeholder tiles ---
+   For the crew we have no photograph of. A drawn figure on a tinted field is
+   honest about being a placeholder, where a stock face would not be. The
+   angle and highlight shift per tile so the two left don't read as one
+   repeated swatch. */
+.pic--placeholder {
+  --ph-angle: 150deg;
+  --ph-x: 30%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-image:
+    radial-gradient(110% 80% at var(--ph-x) 12%, rgba(255, 255, 255, 0.07), transparent 62%),
+    linear-gradient(var(--ph-angle), var(--color-surface-2), var(--color-accent-tint));
+}
+.team-member:nth-child(4) .pic--placeholder { --ph-angle: 115deg; --ph-x: 48%; }
+
+.team-avatar {
+  width: 30%;
+  height: auto;
+  aspect-ratio: 1;
+  color: var(--color-accent);
+  opacity: 0.45;
+  /* Lifted off centre so the figure is not buried under the caption */
+  margin-bottom: 12%;
+  transition: opacity var(--dur-base) var(--ease-out);
+}
+.team-member:hover .team-avatar { opacity: 0.62; }
+
+/* Libby's is a traced portrait rather than a two-stroke pictogram: it needs
+   more area before the glasses and the smile survive the scale-down, and more
+   opacity because its lines are hairlines where the pictograms' are thick. Both
+   are set to land it on the same visual weight as the figures beside it. */
+.team-avatar--portrait {
+  width: 46%;
+  opacity: 0.62;
+  /* Its ink runs the full height of its box, where the pictograms carry padding
+     inside theirs — so it needs a deeper lift to keep the chin off the caption. */
+  margin-bottom: 19%;
+}
+.team-member:hover .team-avatar--portrait { opacity: 0.82; }
+
+/* --- Caption --- */
+.team-caption {
+  position: absolute;
+  inset: auto 0 0 0;
+  padding: var(--space-md) var(--space-sm) var(--space-sm);
+  background: linear-gradient(180deg, rgba(6, 9, 11, 0) 0%, rgba(6, 9, 11, 0.72) 45%, rgba(6, 9, 11, 0.92) 100%);
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+.team-caption h4 {
+  margin: 0;
+  color: #fff;
+  font-size: var(--fs-base);
+  letter-spacing: -0.01em;
+}
+.team-caption .role {
+  color: rgba(255, 255, 255, 0.82);
+  font-size: var(--fs-sm);
+  line-height: 1.35;
+  text-wrap: pretty;
+  /* Held in --fs-sm rather than em: the lead tile sets its role a size larger,
+     and an em reserve there would come out taller and drop Tim's name off the
+     line the other captions share. */
+  min-height: calc(var(--role-lines) * 1.35 * var(--fs-sm));
+}
+/* Same bottom padding as the rest, so Tim's name sits the same distance up
+   from the tile edge as Denys's and Daragh's — the three tiles finish on one
+   line, so their captions do too. */
+.team-member--lead .team-caption {
+  padding: var(--space-xl) var(--space-md) var(--space-sm);
+}
+.team-member--lead .team-caption h4 { font-size: var(--fs-xl); }
+.team-member--lead .team-caption .role { font-size: var(--fs-base); }
+
+/* Caption micro-lift: name first, role a beat behind — pairs with the photo
+   scale and the inset ring. Independent translate, and hover-gated so touch
+   devices never pick up a sticky half-state. */
+@media (hover: hover) and (prefers-reduced-motion: no-preference) {
+  .team-caption h4,
+  .team-caption .role {
+    transition: translate var(--dur-base) var(--ease-out);
+  }
+  .team-member:hover .team-caption h4 { translate: 0 -3px; }
+  .team-member:hover .team-caption .role { translate: 0 -2px; transition-delay: 45ms; }
+}
+
+.team-ig {
+  position: absolute;
+  top: var(--space-sm);
+  right: var(--space-sm);
+  z-index: 2;
+  width: 38px; height: 38px;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  color: #fff;
+  background: rgba(255, 255, 255, 0.14);
+  border: 1px solid rgba(255, 255, 255, 0.38);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  transition: background var(--dur-fast) var(--ease-out),
+              transform var(--dur-fast) var(--ease-out);
+}
+.team-ig:hover {
+  background: var(--color-accent);
+  color: var(--color-on-accent);
+  transform: translateY(-2px);
+}
+.team-ig svg { width: 16px; height: 16px; }
+
+/* Tablet: Tim goes full width above the others, who keep the 3-over-2 shape.
+   Square rather than portrait so a full-width lead tile doesn't run to a
+   thousand pixels tall. */
+@media (max-width: 980px) {
+  .team-grid { grid-template-columns: repeat(6, 1fr); }
+  .team-member--lead {
+    grid-column: span 6;
+    grid-row: auto;
+    aspect-ratio: 1;
+  }
+}
+
+/* Phone: two up, with the last tile taking the full width so the row never
+   ends on a half-empty cell. */
+@media (max-width: 560px) {
+  /* Still three: the tiles halve in width here but the type barely shrinks, so
+     the longest role runs to three lines right across the phone range. */
+  .team-grid { grid-template-columns: repeat(2, 1fr); }
+  .team-member { grid-column: span 1; aspect-ratio: 4 / 5; }
+  .team-member:nth-child(5) { grid-column: span 1; aspect-ratio: 4 / 5; }
+  .team-member:nth-child(6) { grid-column: span 2; aspect-ratio: 3 / 2; }
+  .team-member--lead { grid-column: span 2; aspect-ratio: 1; }
+  .team-avatar { width: 34%; }
+  .team-avatar--portrait { width: 50%; }
+}
+
+/* Narrow phones: two up stops working here. The tiles are down to ~150px, the
+   longest role takes a fourth line, and the caption ends up swallowing three
+   quarters of the tile. One column gives the copy its width back — and with a
+   single tile per row there is nothing to line up, so the reserve goes away
+   and each caption is only as deep as its own text. */
+@media (max-width: 380px) {
+  .team-grid { grid-template-columns: 1fr; --role-lines: 1; }
+  .team-member,
+  .team-member:nth-child(5) { grid-column: span 1; aspect-ratio: 1; }
+  .team-member:nth-child(6) { grid-column: span 1; }
+  .team-member--lead { grid-column: span 1; }
+  .team-avatar { width: 26%; }
+  .team-avatar--portrait { width: 38%; }
+}
+
+/* ---------- FAQ ---------- */
+.faq-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-sm);
+}
+@media (max-width: 760px) {
+  .faq-grid { grid-template-columns: 1fr; }
+}
+.faq-item {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: var(--space-md);
+  transition: transform var(--dur-base) var(--ease-out),
+              border-color var(--dur-base) var(--ease-out),
+              background var(--dur-base) var(--ease-out);
+}
+.faq-item:hover {
+  transform: translateY(-3px);
+  border-color: var(--color-border-strong);
+  background: var(--color-surface-2);
+}
+.faq-item p { font-size: var(--fs-sm); color: var(--color-text-muted); }
+.faq-item h4 {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-2xs);
+  font-size: var(--fs-base);
+}
+/* The mark becomes a tile so the question line has a fixed left edge — four
+   questions of different lengths otherwise read as four different shapes. The
+   tile is its own element rather than padding on the svg, which is what lets
+   it share the centring rule with every other icon tile on the page. The
+   questions wrap on narrow screens, so the tile stays top-aligned and is
+   nudged onto the centre of the first line rather than the whole block. */
+.faq-item h4 > .icon-tile {
+  width: 30px; height: 30px;
+  border-radius: var(--radius-sm);
+  background: var(--tint-accent-soft);
+  border: 1px solid var(--ring-accent);
+  color: var(--color-accent);
+  flex-shrink: 0;
+  margin-top: calc((1em * var(--lh-tight) - 30px) / 2);
+}
+.faq-item h4 > .icon-tile > svg { width: 18px; height: 18px; }
+
+/* ---------- Contact ---------- */
+.contact-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-md);
+  max-width: 980px;
+  margin-inline: auto;
+}
+@media (max-width: 760px) {
+  .contact-grid { grid-template-columns: 1fr; }
+}
+.info-box {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-lg) var(--space-md);
+  text-align: center;
+  transition: transform var(--dur-base) var(--ease-out),
+              box-shadow var(--dur-base) var(--ease-out),
+              border-color var(--dur-base) var(--ease-out);
+}
+.info-box:hover {
+  transform: translateY(-5px);
+  box-shadow: var(--shadow-lg);
+  border-color: var(--ring-accent);
+}
+.info-box .icon-tile {
+  width: 52px; height: 52px;
+  border-radius: 50%;
+  background: var(--tint-accent-soft);
+  border: 1px solid var(--ring-accent);
+  color: var(--color-accent);
+  margin-inline: auto;
+  margin-bottom: var(--space-sm);
+  transition: box-shadow var(--dur-base) var(--ease-out);
+}
+.info-box:hover .icon-tile { box-shadow: var(--glow-accent); }
+.info-box .icon-tile svg { width: 23px; height: 23px; }
+.info-box h3 { font-size: var(--fs-base); text-transform: uppercase; letter-spacing: 0.08em; }
+.info-box p { color: var(--color-text-muted); }
+
+/* ---------- Footer follow card ----------
+   Replaces the third-party feed widget that used to sit in this grid slot.
+   Everything here is built from the footer's own vocabulary: the 38px circle
+   is the same recipe as #footer .social-links a, and the chevron nudge is the
+   one the Useful Links list already uses. The footer stays dark in both
+   themes, so the surfaces are white alphas rather than surface tokens. */
+/* The handle is one unbreakable token, so this column's min-content is wider
+   than the track it gets on a 320px phone. min-width:0 drops the grid item's
+   automatic minimum so the 1fr track can size to the container instead of
+   being pushed out by it; the min-width:0 on .follow-text below is what then
+   lets the handle ellipsise rather than overflow. */
+.footer-follow { min-width: 0; }
+.footer-follow h4 { color: var(--color-footer-text); }
+
+/* Stacked, not a row: the footer's 4th column is only ~320px on desktop, and
+   "@timbeestoncleaning" is a single unbreakable ~165px token. Sharing a line
+   with the mark and the CTA clipped it; on its own line it has the full card
+   width at every breakpoint. */
+.follow-card {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-2xs);
+  padding: var(--space-sm);
+  border-radius: var(--radius-lg);
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--color-footer-rule);
+  transition: transform var(--dur-fast) var(--ease-out),
+              border-color var(--dur-fast) var(--ease-out),
+              background var(--dur-fast) var(--ease-out),
+              box-shadow var(--dur-fast) var(--ease-out);
+}
+.follow-card:hover,
+.follow-card:focus-visible {
+  transform: translateY(-3px);
+  background: rgba(255, 255, 255, 0.08);
+  border-color: var(--ring-accent);
+  box-shadow: var(--shadow-md);
+}
+
+.follow-mark {
+  display: inline-flex;
+  width: 38px; height: 38px;
+  align-items: center; justify-content: center;
+  flex-shrink: 0;
+  border-radius: var(--radius-pill);
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: var(--color-footer-text);
+  transition: background var(--dur-fast) var(--ease-out),
+              border-color var(--dur-fast) var(--ease-out),
+              color var(--dur-fast) var(--ease-out),
+              box-shadow var(--dur-fast) var(--ease-out);
+}
+.follow-mark svg { width: 16px; height: 16px; }
+
+.follow-card:hover .follow-mark,
+.follow-card:focus-visible .follow-mark {
+  background: var(--grad-accent);
+  border-color: transparent;
+  color: var(--color-on-accent);
+  box-shadow: var(--glow-accent);
+}
+
+.follow-handle {
+  display: block;
+  max-width: 100%;
+  margin-top: var(--space-3xs);
+  font-family: var(--font-display);
+  font-stretch: var(--wdth-display);
+  font-weight: 700;
+  font-size: var(--fs-sm);
+  letter-spacing: -0.01em;
+  color: var(--color-footer-text);
+  /* Safety net only — the handle fits at every breakpoint now. */
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.follow-blurb {
+  font-size: var(--fs-sm);
+  line-height: 1.5;
+  color: var(--color-footer-muted);
+}
+
+.follow-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  margin-top: var(--space-3xs);
+  font-size: var(--fs-sm);
+  font-weight: 600;
+  color: var(--color-footer-accent);
+}
+.follow-cta svg {
+  width: 14px; height: 14px;
+  transition: transform var(--dur-fast) var(--ease-out);
+}
+.follow-card:hover .follow-cta svg,
+.follow-card:focus-visible .follow-cta svg { transform: translateX(3px); }
+
+/* ==========================================================================
+   Decorative glass & water layers
+   Purely presentational; positioned in % of the section box so the section's
+   overflow:hidden can clip them without any risk of widening the document.
+   ========================================================================== */
+
+.deco {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.deco-layer {
+  position: absolute;
+  pointer-events: none;
+  /* initDecoParallax writes transform here every frame while active */
+}
+
+/* Compositing is granted only while the section is near the viewport */
+.deco.is-active .deco-layer {
+  will-change: transform;
+}
+
+/* ---------- Ambient motion ----------
+ * Two independent motion systems share these elements:
+ *   scroll parallax  → JS writes `transform`
+ *   ambient loops    → CSS animates `translate` / `rotate` / `scale`
+ * They must stay on separate properties. The independent transform
+ * properties are applied before `transform` and compose with it, so an
+ * animation here can never be clobbered by the per-frame parallax write
+ * (and vice versa). Nothing animates layout or paint — every property
+ * below is compositor-only.
+ *
+ * Each class sets a default duration; individual layers override
+ * animation-duration / -delay so no two shapes ever move in lockstep.
+ */
+@media (prefers-reduced-motion: no-preference) {
+  .deco-float   { animation: deco-float 15s var(--ease-soft) infinite; }
+  .deco-drift   { animation: deco-drift 24s var(--ease-soft) infinite; }
+  .deco-breathe { animation: deco-breathe 13s var(--ease-soft) infinite; }
+  .deco-twinkle { animation: deco-twinkle 7s var(--ease-soft) infinite; }
+  .deco-rise    { animation: deco-rise 26s linear infinite; }
+  .deco-wave    { animation: deco-wave 19s var(--ease-soft) infinite; }
+  .deco-wipe    { animation: deco-wipe 17s var(--ease-soft) infinite; }
+
+  /* Rotating dashed rings. stroke-dashoffset inherits into the <use>
+     shadow tree, which is the only way to reach the geometry from here. */
+  .deco-rings {
+    stroke-dasharray: 13 11;
+    animation: deco-spin 120s linear infinite,
+               deco-dash 14s linear infinite;
+  }
+
+  /* The panes carry a static tilt, so their sway has to be authored around
+     each one's own resting angle — `rotate` cannot be animated relatively. */
+  .deco-tilt-a { animation: deco-tilt-a 21s var(--ease-soft) infinite; }
+  .deco-tilt-b { animation: deco-tilt-b 27s var(--ease-soft) infinite; }
+  .deco-tilt-c { animation: deco-tilt-c 18s var(--ease-soft) infinite; }
+}
+
+/* Off-screen sections cost nothing: the same IntersectionObserver that
+   gates the parallax also parks the ambient loops. Scoped to .deco-live so
+   a browser without IntersectionObserver (where the observer never runs)
+   is left with running animations rather than permanently frozen ones. */
+.deco-live .deco:not(.is-active) .deco-layer {
+  animation-play-state: paused;
+}
+
+@keyframes deco-float {
+  0%, 100% { translate: 0 0; }
+  50%      { translate: 0 -20px; }
+}
+@keyframes deco-drift {
+  0%, 100% { translate: 0 0; }
+  33%      { translate: 16px -12px; }
+  66%      { translate: -10px -22px; }
+}
+@keyframes deco-breathe {
+  0%, 100% { scale: 1; }
+  50%      { scale: 1.07; }
+}
+@keyframes deco-twinkle {
+  0%, 100% { opacity: 0.15; scale: 0.7; }
+  50%      { opacity: 1;    scale: 1.15; }
+}
+/* Bubbles enter below their box and leave above it, fading at both ends so
+   the loop has no visible seam */
+@keyframes deco-rise {
+  0%   { translate: 0 45%;   opacity: 0; }
+  12%  { opacity: 1; }
+  82%  { opacity: 1; }
+  100% { translate: 0 -260%; opacity: 0; }
+}
+@keyframes deco-wave {
+  0%, 100% { translate: -3% 0; }
+  50%      { translate: 3% -6px; }
+}
+@keyframes deco-wipe {
+  0%       { translate: -18% 0; opacity: 0; }
+  20%, 70% { opacity: 1; }
+  100%     { translate: 20% 0;  opacity: 0; }
+}
+@keyframes deco-spin {
+  to { rotate: 360deg; }
+}
+@keyframes deco-dash {
+  to { stroke-dashoffset: -96; }
+}
+@keyframes deco-tilt-a {
+  0%, 100% { rotate: -8deg; }
+  50%      { rotate: -4.5deg; }
+}
+@keyframes deco-tilt-b {
+  0%, 100% { rotate: 4deg; }
+  50%      { rotate: 1deg; }
+}
+@keyframes deco-tilt-c {
+  0%, 100% { rotate: -3deg; }
+  50%      { rotate: -6deg; }
+}
+
+/* --- Hero — bubbles rising over the photography ---
+   z-index 1 puts these above the slide image and its scrim (both 0–1) but
+   under .hero-content and .hero-controls, so nothing readable is touched. */
+.deco--hero { z-index: 1; }
+.deco--hero .deco-h1 { bottom: -12%; left: 7%;   width: 120px; height: 200px; animation-duration: 24s; }
+.deco--hero .deco-h2 { bottom: -16%; right: 14%; width: 88px;  height: 148px; animation-duration: 31s; animation-delay: -11s; }
+.deco--hero .deco-h3 { top: 24%;     right: 27%; width: 26px;  height: 26px;  animation-duration: 6.5s; }
+.deco--hero .deco-h4 { top: 58%;     right: 9%;  width: 18px;  height: 18px;  animation-duration: 9s; animation-delay: -3s; }
+
+/* --- A. #about — droplet cluster hugging the right margin ---
+   Kept clear of the copy column: body text sits directly on the section
+   background with nothing opaque behind it. (Overlapping the cards is fine —
+   they have solid backgrounds and .container sits above the artwork.) */
+.deco--about .deco-a1 { top: 4%;  right: -6%; width: 220px; height: 220px; animation-duration: 18s; }
+.deco--about .deco-a2 { top: 42%; right: -4%; width: 120px; height: 120px; animation-duration: 13s; animation-delay: -5s; }
+.deco--about .deco-a3 { top: 68%; right: 2%;  width: 72px;  height: 72px;  animation-duration: 21s; }
+.deco--about .deco-a4 { top: 27%; right: 17%; width: 22px;  height: 22px;  animation-duration: 8s; animation-delay: -2s; }
+.deco--about .deco-a5 { bottom: -2%; left: -10%; width: 120%; height: 120px; animation-duration: 23s; }
+
+/* --- B. #services — overlapping glass panes, left edge --- */
+/* Uses the independent `rotate` property, not transform: rotate() — the
+   parallax loop writes `transform` inline, which would overwrite it. The
+   .deco-tilt-* animations sway each pane around the resting angle set here;
+   under reduced motion the animation drops out and this angle remains. */
+.deco--services .deco-b1 { top: 6%;  left: -7%; width: 340px; height: 420px; rotate: -8deg; }
+.deco--services .deco-b2 { top: 34%; left: 4%;  width: 260px; height: 320px; rotate: 4deg; }
+.deco--services .deco-b3 { top: 12%; left: 14%; width: 180px; height: 240px; rotate: -3deg; }
+/* The squeegee wipes across the panes it belongs to */
+.deco--services .deco-b4 { top: 22%; left: -4%;  width: 300px; height: 60px; animation-duration: 16s; }
+.deco--services .deco-b5 { top: 46%; right: -5%; width: 220px; height: 220px; animation-duration: 15s; animation-delay: -6s; }
+.deco--services .deco-b6 { top: 14%; right: 12%; width: 24px;  height: 24px; animation-duration: 7.5s; animation-delay: -4s; }
+
+/* --- C. #faq — bubble field, opposite corners --- */
+.deco--faq .deco-c1 { bottom: -4%; left: -3%;  width: 260px; height: 260px; animation-duration: 16s; }
+.deco--faq .deco-c2 { top: 2%;     right: 2%;  width: 170px; height: 170px; animation-duration: 26s; animation-delay: -8s; }
+.deco--faq .deco-c3 { top: -18%;   left: 36%;  width: 300px; height: 300px; animation-duration: 140s; }
+.deco--faq .deco-c4 { bottom: 14%; right: 22%; width: 20px;  height: 20px;  animation-duration: 6s; animation-delay: -1.5s; }
+
+/* --- D. #contact — water-surface ripples along the bottom --- */
+.deco--contact .deco-d1 { bottom: -8%; left: -10%; width: 120%; height: 180px; animation-duration: 21s; }
+.deco--contact .deco-d2 { bottom: 2%;  left: -10%; width: 120%; height: 140px; animation-duration: 17s; animation-delay: -7s; }
+.deco--contact .deco-d3 { top: 8%;     right: 4%;  width: 90px; height: 90px;  animation-duration: 14s; }
+.deco--contact .deco-d4 { bottom: -20%; left: 8%;  width: 100px; height: 170px; animation-duration: 29s; animation-delay: -14s; }
+.deco--contact .deco-d5 { top: 18%;    left: 12%;  width: 20px; height: 20px;  animation-duration: 8.5s; }
+
+/* --- E. #portfolio — rings and glints around the photo strip --- */
+.deco--portfolio .deco-e1 { top: -14%;  left: -8%;  width: 320px; height: 320px; animation-duration: 130s; }
+.deco--portfolio .deco-e2 { top: 12%;   right: 5%;  width: 96px;  height: 96px;  animation-duration: 17s; }
+.deco--portfolio .deco-e3 { bottom: 18%; right: 14%; width: 24px;  height: 24px;  animation-duration: 6.8s; animation-delay: -2.5s; }
+.deco--portfolio .deco-e4 { bottom: 6%;  right: -6%; width: 280px; height: 56px;  animation-duration: 19s; animation-delay: -9s; }
+
+/* --- F. #team — rings behind the portraits, ripple underfoot --- */
+.deco--team .deco-f1 { top: -20%;   right: -6%; width: 300px; height: 300px; animation-duration: 150s; }
+.deco--team .deco-f2 { bottom: 4%;  left: -10%; width: 120%;  height: 130px; animation-duration: 22s; }
+.deco--team .deco-f3 { top: 16%;    left: -4%;  width: 190px; height: 190px; animation-duration: 27s; animation-delay: -10s; }
+.deco--team .deco-f4 { top: 30%;    left: 22%;  width: 18px;  height: 18px;  animation-duration: 7s; }
+
+/* --- G. #footer — water-line riding the page's last seam ---
+   Inline-drawn ripples (see test8.html for why they don't reuse #deco-ripple)
+   hugging the footer's top edge; #footer clips them via overflow:hidden. */
+.deco--footer .deco-g1 { top: -8px; left: -10%; width: 120%; height: 76px; animation-duration: 24s; }
+.deco--footer .deco-g2 { top: 14px; left: -10%; width: 120%; height: 58px; animation-duration: 18s; animation-delay: -7s; }
+
+@media (max-width: 900px) {
+  .deco--about .deco-a1 { width: 150px; height: 150px; }
+  .deco--about .deco-a2 { width: 84px;  height: 84px; }
+  .deco--services .deco-b1 { width: 230px; height: 290px; }
+  .deco--services .deco-b2 { width: 175px; height: 215px; }
+  .deco--services .deco-b5 { width: 150px; height: 150px; }
+  .deco--faq .deco-c1 { width: 180px; height: 180px; }
+  .deco--faq .deco-c2 { width: 120px; height: 120px; }
+  .deco--faq .deco-c3 { width: 210px; height: 210px; }
+  .deco--portfolio .deco-e1 { width: 210px; height: 210px; }
+  .deco--portfolio .deco-e2 { width: 68px;  height: 68px; }
+  .deco--team .deco-f1 { width: 200px; height: 200px; }
+  .deco--team .deco-f3 { width: 130px; height: 130px; }
+}
+
+/* Thin the composition on phones — fewer layers, less to composite */
+@media (max-width: 700px) {
+  .deco-layer[data-mobile="hide"] { display: none; }
+}
+
+/* ==========================================================================
+   Rain on the glass
+   Small convex droplets fixed to the viewport — the screen is the window
+   pane, and the page refracts beneath them as it scrolls. Built by
+   initDroplets() (a no-JS load simply has none), and placed only inside the
+   measured side gutters the centred container never reaches, so no scroll
+   position puts a drop over copy or controls.
+
+   True backdrop magnification isn't possible — backdrop-filter has no
+   scale(), and Chrome/Safari don't accept SVG filters there — so the lens
+   is an approximation that holds up at this size: a whisper of backdrop
+   blur/brightness for the wet distortion, a dark "compressed image" ring at
+   the lower rim, a specular highlight, and a cast shadow for convexity.
+   ========================================================================== */
+
+.droplets {
+  position: fixed;
+  inset: 0;
+  z-index: 190;            /* above page chrome, below the film grain (200) */
+  pointer-events: none;
+  overflow: hidden;        /* a jittered drop at the frame edge clips clean */
+}
+
+.droplet {
+  position: absolute;
+  /* left/top/width/height come inline from initDroplets(), already offset
+     to the drop's centre — the `translate` property is NOT used for
+     centring because the run-off animation below owns it. */
+  /* Per-theme filter list: dark lifts the backdrop a touch, light darkens
+     it — on near-white the drop's body must separate from the page before
+     any white highlight can register. Brightness stays within ±4%; more
+     milks the belly up into a marble. */
+  backdrop-filter: var(--drop-backdrop);
+  -webkit-backdrop-filter: var(--drop-backdrop);
+  background:
+    /* tight specular, upper left — the haze-free falloff is what keeps the
+       centre of the drop reading as clear water */
+    radial-gradient(circle at 30% 24%,
+      var(--drop-hi) 0%, rgba(255, 255, 255, 0.22) 9%, transparent 22%),
+    /* interior wash — imperceptible in dark mode, a cool body on white */
+    radial-gradient(circle at 50% 45%,
+      var(--drop-tint) 0%, var(--drop-tint) 62%, transparent 78%),
+    /* caustic: light focused through the drop pools at the lower belly */
+    radial-gradient(ellipse 42% 20% at 50% 86%,
+      rgba(255, 255, 255, 0.25), transparent 72%),
+    /* meniscus: the raised centre thickens the dark "compressed image"
+       ring toward the bottom, where a real drop bends the most light */
+    radial-gradient(circle at 50% 40%,
+      transparent 60%, var(--drop-shade) 84%, var(--drop-shade) 94%,
+      rgba(255, 255, 255, 0.2) 99%, transparent 100%);
+  box-shadow:
+    inset 0 0 0 1px var(--drop-edge),   /* meniscus line — carries the drop on white */
+    inset 1px 1px 1px rgba(255, 255, 255, 0.28),
+    inset -1px -2px 3px var(--drop-shade),
+    0 1px 2px var(--drop-cast),
+    0 3px 6px var(--drop-cast);
+}
+
+/* Slightly irregular silhouettes, assigned per drop by initDroplets(), so
+   the scatter doesn't read as stamped circles. Independent `rotate` — the
+   drops carry no transform, so nothing composes against it. */
+.droplet--a { border-radius: 51% 49% 54% 46% / 48% 54% 46% 52%; }
+.droplet--b { border-radius: 47% 53% 49% 51% / 53% 47% 55% 45%; rotate: 14deg; }
+.droplet--c { border-radius: 53% 47% 50% 50% / 46% 52% 48% 54%; rotate: -11deg; }
+
+/* The smallest drops skip the backdrop sample — below ~18px the refraction
+   is unreadable and shading alone carries them. initDroplets() also uses
+   this class to cap how many live backdrop-filters exist at once. */
+.droplet--tiny {
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+
+/* The moving light: a soft specular ellipse drifting and brightening on its
+   own cycle. --glint-dur/--glint-delay come inline per drop so no two pulse
+   together (same philosophy as the deco layers' per-layer durations). */
+.droplet::after {
+  content: "";
+  position: absolute;
+  left: 20%;
+  top: 14%;
+  width: 30%;
+  height: 22%;
+  border-radius: 50%;
+  /* Tokenised: bright white in dark mode, a cool glass-glare gray on the
+     light page, where a white reflection would vanish into the background. */
+  background: radial-gradient(closest-side, var(--drop-glint), transparent 72%);
+  filter: blur(0.5px);
+  opacity: 0.55;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .droplet::after {
+    animation: drop-glint var(--glint-dur, 7s) var(--ease-soft) infinite var(--glint-delay, 0s);
+  }
+
+  /* One-shot lifecycle: each drop condenses in on its stagger slot, sits a
+     moment, then runs down the glass — gravity easing, a slight downward
+     stretch, drifting a few px sideways and drying up as it goes. The
+     per-drop numbers (--in-delay, --slide-dur, --slide-delay, --run-x,
+     --run-y) come inline from initDroplets(), which removes the whole
+     overlay once the last drop has gone. Under reduced motion
+     initDroplets() builds nothing at all. */
+  .droplet {
+    animation:
+      drop-in 600ms var(--ease-back) var(--in-delay, 0s) backwards,
+      drop-slide var(--slide-dur, 1.6s) cubic-bezier(0.5, 0, 0.75, 0.6) var(--slide-delay, 3s) forwards;
+  }
+}
+@keyframes drop-glint {
+  0%, 100% { opacity: 0.45; transform: translate(0, 0) scale(1); }
+  50%      { opacity: 0.95; transform: translate(18%, 10%) scale(1.18); }
+}
+@keyframes drop-in {
+  from { opacity: 0; scale: 0.55; }
+}
+@keyframes drop-slide {
+  to {
+    translate: var(--run-x, 0px) var(--run-y, 160px);
+    scale: 0.92 1.28;
+    opacity: 0;
+  }
+}
+
+/* Lives here, after the reveal transition rule, so the cascade cannot
+   re-enable it (base.css loads before this file). */
+@media (prefers-reduced-motion: reduce) {
+  .js [data-reveal] { transition: none; }
+}
