@@ -47,9 +47,17 @@ body::after {
   content: "";
   position: fixed;
   inset: 0;
-  /* Above page chrome but below the <dialog>, which renders in the top layer
-     regardless of z-index. Never interactive. */
-  z-index: 200;
+  /* Above page content, BELOW the sticky header (60) and the rest of the
+     chrome. It used to sit at 200, over everything, and that broke iPhone
+     Safari 26: Safari paints the status-bar strip with the colour of the
+     topmost fixed/sticky layer that touches the top edge and has a
+     background, and this layer has one (the noise image) but no colour, so
+     Safari gave up and composited raw page pixels under the clock. With the
+     grain beneath the header, the header's own colour is what Safari finds
+     and extends. At 2–4% alpha the grain's absence over the header, drawer
+     and floating discs is imperceptible. The <dialog> renders in the top
+     layer regardless of z-index. Never interactive. */
+  z-index: 50;
   pointer-events: none;
   opacity: var(--grain-o);
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
