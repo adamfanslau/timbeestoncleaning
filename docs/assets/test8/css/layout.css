@@ -179,15 +179,28 @@
   height: var(--header-h);
   display: flex;
   align-items: center;
-  background: transparent;
+  /* The tint lives HERE, on the sticky element itself, not on the plate
+     below. iPhone Safari (26+) never gives the page the status-bar strip
+     in browser mode (safe-area-inset-top is 0, viewport-fit=cover only
+     matters for home-screen apps). Instead it tints that strip by sampling
+     the background-color of the fixed/sticky element touching the top
+     edge, and it ignores pseudo-elements. With a transparent header Safari
+     found no chrome and composited raw page pixels under the clock; with
+     the colour here the strip becomes an extension of the header. A plain
+     colour does not make a containing block, so the drawer inside stays
+     viewport-sized. */
+  background-color: transparent;
+  transition: background-color var(--dur-base) var(--ease-out);
 }
+#header.is-scrolled { background-color: var(--color-header-bg); }
 
-/* The frosted plate lives on a pseudo-element and NEVER on #header itself:
+/* The frosted BLUR lives on a pseudo-element and NEVER on #header itself:
    backdrop-filter makes an element a containing block for position:fixed
    descendants, which would shrink the mobile nav drawer and its backdrop
    from the viewport down to this 76px-tall box the moment the header
    picked up .is-scrolled. Fading opacity also animates cleanly, which
-   backdrop-filter does not.
+   backdrop-filter does not. The colour is on #header (see above) so Safari
+   can sample it; this plate carries only the blur and the bottom hairline.
 
    The plate reaches --safe-top above the header box: while the header is
    stuck that puts its top edge at the very top of the screen, so on iPhone
@@ -199,7 +212,6 @@
   position: absolute;
   inset: calc(-1 * var(--safe-top)) 0 0 0;
   z-index: -1;
-  background: var(--color-header-bg);
   backdrop-filter: blur(16px) saturate(140%);
   -webkit-backdrop-filter: blur(16px) saturate(140%);
   box-shadow: var(--shadow-sm), inset 0 -1px 0 var(--color-border);
