@@ -1287,8 +1287,7 @@ html.theme-wipe .hero-badge::after {
 /* --- Placeholder tiles ---
    For the crew we have no photograph of. A drawn figure on a tinted field is
    honest about being a placeholder, where a stock face would not be. The
-   angle and highlight shift per tile so the two left don't read as one
-   repeated swatch. */
+   Only Libby's tile still uses it. */
 .pic--placeholder {
   --ph-angle: 150deg;
   --ph-x: 30%;
@@ -1299,7 +1298,6 @@ html.theme-wipe .hero-badge::after {
     radial-gradient(110% 80% at var(--ph-x) 12%, rgba(255, 255, 255, 0.07), transparent 62%),
     linear-gradient(var(--ph-angle), var(--color-surface-2), var(--color-accent-tint));
 }
-.team-member:nth-child(4) .pic--placeholder { --ph-angle: 115deg; --ph-x: 48%; }
 
 .team-avatar {
   width: 30%;

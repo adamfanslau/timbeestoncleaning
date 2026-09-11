@@ -57,7 +57,7 @@
   <link href="assets/test8/css/tokens.css?v=20260911b" rel="stylesheet">
   <link href="assets/test8/css/base.css?v=20260911b" rel="stylesheet">
   <link href="assets/test8/css/layout.css?v=20260911b" rel="stylesheet">
-  <link href="assets/test8/css/components.css?v=20260911b" rel="stylesheet">
+  <link href="assets/test8/css/components.css?v=20260911c" rel="stylesheet">
 </head>
 
 <body>
@@ -128,12 +128,6 @@
       </symbol>
       <symbol id="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
         <path d="M20.5 14.2A8.6 8.6 0 0 1 9.8 3.5a8.6 8.6 0 1 0 10.7 10.7z"/>
-      </symbol>
-      <!-- Stands in for a team portrait we don't have yet. Lighter stroke than
-           the UI icons around it because it renders far larger than 24px. -->
-      <symbol id="icon-portrait" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round">
-        <circle cx="12" cy="8.6" r="3.7"/>
-        <path d="M4.6 20.4a7.4 7.4 0 0 1 14.8 0"/>
       </symbol>
       <!-- Paint servers for the squeegee below. They must sit in the light-DOM
            <defs> (like the deco-grad-* set further down): document CSS cannot
@@ -805,8 +799,11 @@
           </figure>
 
           <figure class="team-member" data-reveal>
-            <div class="pic pic--placeholder">
-              <svg class="team-avatar" aria-hidden="true"><use href="#icon-portrait"></use></svg>
+            <div class="pic">
+              <picture>
+                <source type="image/webp" srcset="assets/test8/img/team/molly-320.webp 320w, assets/test8/img/team/molly-640.webp 640w" sizes="(max-width: 380px) 90vw, (max-width: 560px) 45vw, (max-width: 980px) 30vw, 20vw">
+                <img src="assets/test8/img/team/molly-320.jpg" srcset="assets/test8/img/team/molly-320.jpg 320w, assets/test8/img/team/molly-640.jpg 640w" sizes="(max-width: 380px) 90vw, (max-width: 560px) 45vw, (max-width: 980px) 30vw, 20vw" alt="Molly smiling in her Tim Beeston Clean fleece, in front of the company logo" width="640" height="640" loading="lazy" decoding="async">
+              </picture>
             </div>
             <figcaption class="team-caption">
               <h4>Molly</h4>
