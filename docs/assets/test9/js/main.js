@@ -332,8 +332,10 @@
    * unbalanced event pair can never leave a counter stuck above zero, and a
    * release resumes with the time that was left — the same time the dot's
    * CSS fill (paused via .hero-paused) has left. Hover holds only for a real
-   * mouse; focus holds only for keyboard focus (:focus-visible), so clicking
-   * Next never parks the slideshow.
+   * mouse and only over the controls and the slide's buttons — the hero
+   * fills the first desktop viewport, so a hover hold on the whole section
+   * would leave the show parked under an idle pointer. Focus holds only for
+   * keyboard focus (:focus-visible), so clicking Next never parks it.
    */
   var SLIDE_MS = 6000;
 
@@ -414,8 +416,10 @@
         playBtn.setAttribute("aria-label", userPaused ? "Play slideshow" : "Pause slideshow");
         var iconPause = playBtn.querySelector(".icon-pause");
         var iconPlay = playBtn.querySelector(".icon-play");
-        if (iconPause) iconPause.hidden = userPaused;
-        if (iconPlay) iconPlay.hidden = !userPaused;
+        // Attribute, not the .hidden property: SVG elements have no
+        // `hidden` IDL property, so a property write would go nowhere.
+        if (iconPause) { if (userPaused) iconPause.setAttribute("hidden", ""); else iconPause.removeAttribute("hidden"); }
+        if (iconPlay) { if (userPaused) iconPlay.removeAttribute("hidden"); else iconPlay.setAttribute("hidden", ""); }
       }
     }
 
@@ -493,13 +497,19 @@
     }
 
     /* --- Holds --- */
-    // Hover: a real mouse only. A touch "enters" on every tap and its leave
-    // is not guaranteed, which is how a counter got stuck before.
-    hero.addEventListener("pointerenter", function (e) {
-      if (e.pointerType === "mouse") hold("hover");
-    });
-    hero.addEventListener("pointerleave", function (e) {
-      if (e.pointerType === "mouse") release("hover");
+    // Hover: a real mouse only (a touch "enters" on every tap and its leave
+    // is not guaranteed, which is how a counter got stuck before), and only
+    // over the pieces a slide change would pull out from under the pointer:
+    // the controls and the slide's own buttons. Not the whole hero — on a
+    // desktop it fills the viewport, and an idle pointer would park the show.
+    var hoverZones = Array.prototype.slice.call(hero.querySelectorAll(".hero-controls, .hero-actions"));
+    hoverZones.forEach(function (zone) {
+      zone.addEventListener("pointerenter", function (e) {
+        if (e.pointerType === "mouse") hold("hover");
+      });
+      zone.addEventListener("pointerleave", function (e) {
+        if (e.pointerType === "mouse") release("hover");
+      });
     });
 
     // Focus: keyboard focus only. A mouse click on Next focuses the button
