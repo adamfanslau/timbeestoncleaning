@@ -1,0 +1,68 @@
+# Test deployment to the VPS as tbc.fanslau.me. From the vps repo template
+# workflows/deploy-static-site.yml; setup steps in its docs/50-deploy-from-github.md.
+# GitHub Pages (pages.yml) remains the main deployment.
+#
+# Repo secrets:   VPS_HOST  VPS_SSH_KEY  VPS_KNOWN_HOSTS
+# Repo variables: SITE_DOMAIN  (e.g. example.com)  BUILD_DIR  (e.g. out, dist, public, .)
+#
+# Each push to main uploads the build to /srv/www/<domain>/releases/<sha>/ and
+# flips the `current` symlink. Rollback: ssh with the same key and run `rollback`.
+
+name: Deploy to VPS (tbc.fanslau.me)
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-${{ vars.SITE_DOMAIN }}
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: production
+    env:
+      BUILD_DIR: ${{ vars.BUILD_DIR || '.' }}
+    steps:
+      - uses: actions/checkout@v4
+
+
+      - name: Check build output
+        run: |
+          test -d "$BUILD_DIR" || { echo "BUILD_DIR '$BUILD_DIR' not found"; exit 1; }
+          test -f "$BUILD_DIR/index.html" || echo "::warning::no index.html in $BUILD_DIR"
+
+      - name: Set up SSH
+        run: |
+          mkdir -p ~/.ssh
+          printf '%s\n' "${{ secrets.VPS_SSH_KEY }}" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          printf '%s\n' "${{ secrets.VPS_KNOWN_HOSTS }}" >> ~/.ssh/known_hosts
+          cat > ~/.ssh/config <<EOF
+          Host vps
+            HostName ${{ secrets.VPS_HOST }}
+            Port ${{ vars.VPS_SSH_PORT || 22 }}
+            User deploy
+            IdentityFile ~/.ssh/deploy_key
+            IdentitiesOnly yes
+            StrictHostKeyChecking yes
+          EOF
+
+      - name: Upload release
+        run: |
+          rsync -az --delete --chmod=D755,F644 \
+            --exclude '.git' --exclude '.DS_Store' \
+            "$BUILD_DIR"/ "vps:${GITHUB_SHA}/"
+
+      - name: Activate release
+        run: ssh vps activate "$GITHUB_SHA"
+
+      - name: Smoke test
+        run: |
+          sleep 2
+          curl -fsSIL --max-time 20 "https://${{ vars.SITE_DOMAIN }}/" | head -n 1
