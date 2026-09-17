@@ -65,4 +65,6 @@ jobs:
       - name: Smoke test
         run: |
           sleep 2
-          curl -fsSIL --max-time 20 "https://${{ vars.SITE_DOMAIN }}/" | head -n 1
+          code=$(curl -sS -o /dev/null -w '%{http_code}' --max-time 20 --max-redirs 3 -L "https://${{ vars.SITE_DOMAIN }}/")
+          echo "https://${{ vars.SITE_DOMAIN }}/ -> $code"
+          test "$code" = "200"
